@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from enum import Enum
 
-class Model(str, Enum):
+class ResourceModel(str, Enum):
     city = 'cities'
     country = 'countries'
     subcountry = 'sub-countries'
