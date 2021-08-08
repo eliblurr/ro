@@ -2,63 +2,70 @@ from fastapi import APIRouter, Depends
 from cls import ContentQueryChecker
 from sqlalchemy.orm import Session
 from dependencies import get_db
-from typing import List, Union
 from . import crud, schemas
+from typing import Union
 
 router = APIRouter()
 
-@router.get("/class-decor-param/")
-@ContentQueryChecker(crud.sub_country.model.c(), 'kl')
-def test(a:int=None, n:int=None, db:Session=Depends(get_db), **query_params):
-    print(query_params, db)
+@router.post('/countries', description='', response_model=schemas.Country, status_code=201, name='Country')
+async def create(payload:schemas.CreateCountry, db:Session=Depends(get_db)):
+    return await crud.country.create(payload, db)
 
-'''
-    # split q @ :
-    # get index[0] @ sort
-    # verify datatypes for params in request
-    # optional control query
-    # exact cols val
+@router.get('/countries', description='', response_model=schemas.CountryList, name='Countries')
+@ContentQueryChecker(crud.country.model.c(), None)
+async def read(db:Session=Depends(get_db), **params):
+    return await crud.country.read(params, db)
 
-    # **{self.alias+'__pk__exact':id}
-    # **{key+'something':Depends()}
+@router.get('/countries/{resource_id}', description='', response_model=schemas.Country, name='Country')
+async def read_by_id(resource_id:int, db:Session=Depends(get_db)):
+    return await crud.country.read_by_id(resource_id, db)
 
-    # params[:-1]
+@router.patch('/countries/{resource_id}', description='', response_model=schemas.Country, name='Country')
+async def update(resource_id:int, payload:schemas.UpdateCountry, db:Session=Depends(get_db)):
+    return await crud.country.update(resource_id, payload, db)
 
-    class ResourceResolve:
-        def __init__(self, model:schemas.ResourceModel, payload:Union[schemas.Country,]):
-            self.model = model
-            self.payload = payload
+@router.delete('/countries/{resource_id}', description='', name='Country')
+async def delete(resource_id:int, db:Session=Depends(get_db)):
+    return await crud.country.delete(resource_id, db)
 
-        def model(self):
-            return self.model
+@router.post('/sub-countries', description='', response_model=schemas.SubCountry, status_code=201, name='Sub Country')
+async def create(payload:schemas.CreateSubCountry, db:Session=Depends(get_db)):
+    return await crud.sub_country.create(payload, db)
 
-        def payload(self):
-            return self.payload
+@router.get('/sub-countries', description='', response_model=schemas.SubCountryList, name='Sub Countries')
+@ContentQueryChecker(crud.sub_country.model.c(), None)
+async def read(db:Session=Depends(get_db), **params):
+    return await crud.sub_country.read(params, db)
 
-    async def model(model:schemas.Model):
-        return crud.country if model is schemas.Model.country \
-        else crud.subcountry if model is schemas.Model.country \
-        else crud.city
+@router.get('/sub-countries/{resource_id}', description='', response_model=schemas.SubCountry, name='Sub Country')
+async def read_by_id(resource_id:int, db:Session=Depends(get_db)):
+    return await crud.sub_country.read_by_id(resource_id, db)
 
-    async def pair(payload:Union[schemas.Country,], model=Depends(model)):
-        if model and payload:
-            return model, payload,
-        return model
+@router.patch('/sub-countries/{resource_id}', description='', response_model=schemas.SubCountry, name='Sub Country')
+async def update(resource_id:int, payload:schemas.UpdateCountry, db:Session=Depends(get_db)):
+    return await crud.sub_country.update(resource_id, payload, db)
 
-    @router.get('/{model}', description='')
-    async def read(model=Depends(model), search:str=None, value:str=None, skip:int=0, limit:int=100, db:Session=Depends(get_db)):
-        return await model.read(db, search, value, skip, limit)
+@router.delete('/sub-countries/{resource_id}', description='', name='Sub Country')
+async def delete(resource_id:int, db:Session=Depends(get_db)):
+    return await crud.sub_country.delete(resource_id, db)
 
-    @router.get('/{model}/{id}', description='')
-    async def read_by_id(id:int, model=Depends(model), db:Session=Depends(get_db)):
-        return await model.read_by_id(id, db)
+@router.post('/cities', description='', response_model=schemas.City, status_code=201, name='City')
+async def create(payload:schemas.CreateCity, db:Session=Depends(get_db)):
+    return await crud.city.create(payload, db)
 
-    @router.patch('/{model}/{id}', description='')
-    async def update(id:int, pair:dict=Depends(pair), db:Session=Depends(get_db)):
-        return await pair[0].update(id, pair[1], db)
+@router.get('/cities', description='', response_model=schemas.CityList, name='Cities')
+@ContentQueryChecker(crud.city.model.c(), None)
+async def read(db:Session=Depends(get_db), **params):
+    return await crud.city.read(params, db)
 
-    @router.delete('/{model}/{id}', description='')
-    async def delete(id:int, model=Depends(model), db:Session=Depends(get_db)):
-        return await model.delete(id, db)
+@router.get('/cities/{resource_id}', description='', response_model=schemas.City, name='City')
+async def read_by_id(resource_id:int, db:Session=Depends(get_db)):
+    return await crud.city.read_by_id(resource_id, db)
 
-'''
+@router.patch('/cities/{resource_id}', description='', response_model=schemas.City, name='City')
+async def update(resource_id:int, payload:schemas.UpdateCity, db:Session=Depends(get_db)):
+    return await crud.city.update(resource_id, payload, db)
+
+@router.delete('/cities/{resource_id}', description='', name='City')
+async def delete(resource_id:int, db:Session=Depends(get_db)):
+    return await crud.city.delete(resource_id, db)

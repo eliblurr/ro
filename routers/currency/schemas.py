@@ -16,13 +16,13 @@ class UpdateCurrency(BaseModel):
 
 class Currency(CurrencyBase):
     id: int
-    created_at: datetime.datetime
-    updated_at: datetime.datetime
+    created: datetime.datetime
+    updated: datetime.datetime
 
     class Config:
         orm_mode = True
 
-class CurrencyResponse(BaseModel):
+class CurrencyList(BaseModel):
     bk_size: int
     pg_size: int
     data: List[Currency]
