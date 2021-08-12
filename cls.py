@@ -71,24 +71,7 @@ class CRUD:
             #     pass
 
         print(base)
-
-        base.all()
-        
-        
-        # dte_filters = {x:params[x] for x in params if x not in {"offset", "limit", "q", "sort", "action"} and isinstance(self.model.__table__.c[x].type.python_type, datetime.datetime) and params[x] is not None}
-        # [f'{k} < {v}' if op=='lt' else f'{k} <= {v}' if op=='lte' else f'{k} > {v}' if op=='gt' else f'{k} >= {v}' if op=='gte' else '=' for k,v in dte_filters if re.search(DT_Y, v)]
-
-        # [f'{k} = {v}' for k,v in dte_filters if not re.search(DT_Y, v)]
-        # for k,v in dte_filters:
-        #     if re.search(DT_Y, v):
-        #         op, v = v.split(':')
-        #         [f'{k} < {v}' if op=='lt' else f'{k} <= {v}' if op=='lte' else f'{k} > {v}' if op=='gt' else f'{k} >= {v}' if op=='gte' else '=' for k,v in dte_filters]
-        #         op = 'lt|lte|gt|gte'
-        #         pass
-        #     filter(and_(
-
-        #     ))
-
+    
     async def update(self, id, payload, db:Session, images=None):
         db.query(self.model).filter(self.model.id==id).update(payload.dict(exclude_unset=True))
         db.commit()
