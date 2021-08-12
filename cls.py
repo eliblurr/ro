@@ -40,19 +40,14 @@ class CRUD:
             else:
                 q_or = [ or_(*[self.model.__table__.c[col].like('%' + str(val) + '%') for col in [col[0] for col in self.model.c()]]) for val in q_or ]
             base = base.filter(and_(*q_and)).filter(and_(*q_or))
-
-        print(base)
              
         data = base.offset(params['offset']).limit(params['limit']).all()
         return {'bk_size':base.count(), 'pg_size':data.__len__(), 'data':data}
 
-
         '''////////////////////////////////////'''
+
         dte_filters = {x:params[x] for x in params if self.model.__table__.c[x].type.python_type == datetime.datetime and params[x] is not None}
         # dte_filters = {x:params[x] for x in params if x not in {"offset", "limit", "q", "sort", "action"} and isinstance(self.model.__table__.c[x].type.python_type, datetime.datetime) and params[x] is not None}
-
-        # filter(and_(**ext_filters))
-
         # [f'{k} < {v}' if op=='lt' else f'{k} <= {v}' if op=='lte' else f'{k} > {v}' if op=='gt' else f'{k} >= {v}' if op=='gte' else '=' for k,v in dte_filters if re.search(DT_Y, v)]
 
         [f'{k} = {v}' for k,v in dte_filters if not re.search(DT_Y, v)]
@@ -66,110 +61,7 @@ class CRUD:
 
             ))
 
-        # 1. exact filter *
-        # 2. like AND filter -> q k:v *
-        # 3. like OR filter -> q v *
-        # 4. date filter
-        # 5. sort *
-        # 6. offset & limit *
-
         
-        # and params[x] is not None and self.model.__table__.c[x].type.python_type != datetime.datetime
-        # and self.model.__table__.c[x].type.python_type != datetime.datetime
-        text_filter = params['q']
-        # param[1]!=datetime.datetime
-
-        # if db.bind.dialect.name=='postgres':
-        #   text search here
-
-        v = 'created'
-        print(
-            filters,
-            sep='\n'
-        )
-        # '-' if n else 9
-        # print(self.model.__table__.c[v].type)
-        # return string  
-        # return (sort_str.join(s))
-        # handle q
-        # handle sort
-        if params['q']:
-            for item in params['q']:
-                if re.search(Q_STR_X, item):
-                    q_kv = {}
-                    k,v = item.split(':')
-                    # k like v and
-                    print(k,v)
-                    
-            # text_search 
-            # like_search split @ :
-        
-            # c3 = red
-            # a = [
-            #     'self.model.'+item[1:]+'.desc()'  for item in params['sort'] if re.search(SORT_STR_X, item)
-            # ]
-            # b = [
-            #     'self.model.'+item[1:]+'.asc()'  for item in params['sort'] if not re.search(SORT_STR_X, item)
-            # ]
-            # print(c, c2, sep='\n')
-            # for item in params['sort']:
-            #     item[1:]
-            #     print(
-            #         item[1:],
-            #         re.search(SORT_STR_X, '-string')
-            #     )
-                
-            #     pass
-            #     SORT_STR_X
-            # print('sd')
-        # for item in params.get('sort', []):
-        #     pass
-        # handle action
-        
-
-        # base = base.order_by(text("id desc, id desc"))
-        # base = base.order_by(self.model.id.desc(), self.model.id.asc())
-            
-        # base = base.filter(text('id=1'))
-        print()
-        # base = base.filter(self.model.__ts_vector__.match('ga'))
-        #  AND symbol=null
-
-        print(base)
-        
-        data = base.offset(params['offset']).limit(params['limit']).all()
-        return {'bk_size':base.count(), 'pg_size':data.__len__(), 'data':data}
-        # print('read')
-        # {'status': None, 'created': None, 'id': None, 'updated': None, 'title': None, 'symbol': None, 'offset': None, 'limit': None, 'q': None, 'sort': None}
-        # return
-        # if re.search(Q_STR_X, params.get(q,'')): -> like else text_search - for all q 
-
-        # control - offset, limit, q, sort, action
-        # control = {"offset", "limit", "q", "sort", "action"}
-        # param_copy = {x:d[x] for x in d if x not in control} -> remove all unset
-        # .filter(and_(**param_copy))
-
-        # q = like search[split@:] and text_search
-        # sort = index 0 if - desc else asc
-        # search:str=None, value:str=None, skip:int=0, limit:int=100
-        # split q @ :
-        # get index[0] @ sort [compare to regex expression]
-
-        # optional control query
-        # exact cols val
-
-        # **{self.alias+'__pk__exact':id}
-        
-        # if search and value:
-        #     try:
-        #         base = base.filter(self.model.__table__.c[search].like("%" + value + "%"))
-        #     except KeyError:
-        #         pass
-        # print('base')
-        # {'bk_size':bk_size, 'pg_size':data.__len__(), 'data':data}
-        return {'bk_size':base.count(), 'pg_size':12, 'data':base.all()}
-        # base.all()
-        # base.offset(params['offset']).limit(params['limit']).all()
 
     async def update(self, id, payload, db:Session, images=None):
         db.query(self.model).filter(self.model.id==id).update(payload.dict(exclude_unset=True))
@@ -180,20 +72,6 @@ class CRUD:
         rows = db.query(self.model).filter(self.model.id==id).delete()
         db.commit()
         return rows
-
-
-#         base = db.query(self.model)
-#         bk_size = base.count()
-#         if search and value:
-#             try:
-#                 if self.model.__table__.c[search].type.python_type==bool  or self.model.__table__.c[search].type.python_type==int:
-#                     base = base.filter(self.model.__table__.c[search]==value)
-#                 else:
-#                     base = base.filter(self.model.__table__.c[search].like("%" + value + "%"))
-#             except KeyError:
-#                 pass
-#         data = base.offset(skip).limit(limit).all()
-#         return {'bk_size':bk_size, 'pg_size':data.__len__(), 'data':data}
 
 class ContentQueryChecker:
     def __init__(self, cols=None, actions=None):
@@ -226,6 +104,13 @@ class ContentQueryChecker:
 
 '''
     NOTES
+    # 1. exact filter *
+    # 2. like AND filter -> q k:v *
+    # 3. like OR filter -> q v *
+    # 4. date filter
+    # 5. sort *
+    # 6. offset & limit *
+
     cols = [col[0] for col in self.model.c()]
     vals =  ['string1', 'string2']
     for val in vals:
