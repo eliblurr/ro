@@ -35,26 +35,21 @@ class CRUD:
             q_and, q_or = [], []
             [q_and.append(item) if re.search(Q_STR_X, item) else q_or.append(item) for item in params['q']]
             q_and = [self.model.__table__.c[item.split(':')[0]].like('%' + str(item.split(':')[1]) + '%') for item in q_and]
-
-            t = [self.model.__table__.c[col].like('%%%s%%' % item) for col in ['id', 'created', 'status'] for item in q_or]
-            # base= base.filter(t)
-            print(t)
-
-            q_or = [self.model.__ts_vector__.match(item) if db.bind.dialect.name=='postgres' else self.model.__table__.c[col].like('%%%s%%' % item) for col in ['id', 'created', 'status'] for item in q_or]
+            if db.bind.dialect.name=='postgres':
+                q_or = [self.model.__ts_vector__.match(item) for item in q_or]
+            else:
+                q_or = [ or_(*[self.model.__table__.c[col].like('%' + str(val) + '%') for col in [col[0] for col in self.model.c()]]) for val in q_or ]
             base = base.filter(and_(*q_and)).filter(and_(*q_or))
 
-            a = [val for sublist in self.model.c() for val in sublist]
-
-        # dte_filters = {x:params[x] for x in params if x not in {"offset", "limit", "q", "sort", "action"} and isinstance(self.model.__table__.c[x].type.python_type, datetime.datetime) and params[x] is not None}
         print(base)
-
+             
         data = base.offset(params['offset']).limit(params['limit']).all()
         return {'bk_size':base.count(), 'pg_size':data.__len__(), 'data':data}
 
 
         '''////////////////////////////////////'''
-        ext_filters = {x:params[x] for x in params if x not in {"offset", "limit", "q", "sort", "action"} and params[x] is not None and self.model.__table__.c[x].type.python_type != datetime.datetime}
         dte_filters = {x:params[x] for x in params if self.model.__table__.c[x].type.python_type == datetime.datetime and params[x] is not None}
+        # dte_filters = {x:params[x] for x in params if x not in {"offset", "limit", "q", "sort", "action"} and isinstance(self.model.__table__.c[x].type.python_type, datetime.datetime) and params[x] is not None}
 
         # filter(and_(**ext_filters))
 
@@ -73,7 +68,7 @@ class CRUD:
 
         # 1. exact filter *
         # 2. like AND filter -> q k:v *
-        # 3. like OR filter -> q v
+        # 3. like OR filter -> q v *
         # 4. date filter
         # 5. sort *
         # 6. offset & limit *
@@ -228,3 +223,13 @@ class ContentQueryChecker:
             params.extend([Parameter('action', Parameter.KEYWORD_ONLY, annotation=str, default=Query(None))])
         wrapper.__signature__ = Signature(params)
         return wrapper
+
+'''
+    NOTES
+    cols = [col[0] for col in self.model.c()]
+    vals =  ['string1', 'string2']
+    for val in vals:
+        n_vals = [self.model.__table__.c[col].like('%' + str(val) + '%') for col in cols]
+    x = [ or_(*[self.model.__table__.c[col].like('%' + str(val) + '%') for col in cols]) for val in vals ]
+    base = base.filter(and_(*x))
+'''
