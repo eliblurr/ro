@@ -26,7 +26,8 @@ class CRUD:
 
     async def read(self, params, db:Session):
         base = db.query(self.model)
-        ext_filters = {x:params[x] for x in params if x not in {"offset", "limit", "q", "sort", "action"} and params[x] is not None and self.model.__table__.c[x].type.python_type != datetime.datetime}
+        dt_cols = [col[0] for col in self.model.c() if col[1]==datetime.datetime]
+        ext_filters = {x:params[x] for x in params if x not in ["offset", "limit", "q", "sort", "action", *dt_cols] and params[x] is not None}
         base = base.filter_by(**ext_filters)
         if params['sort']:
             sort = [f'{item[1:]} desc' if re.search(SORT_STR_X, item) else f'{item} asc' for item in params['sort']]
@@ -42,26 +43,51 @@ class CRUD:
             base = base.filter(and_(*q_and)).filter(and_(*q_or))
              
         data = base.offset(params['offset']).limit(params['limit']).all()
-        return {'bk_size':base.count(), 'pg_size':data.__len__(), 'data':data}
+        # return {'bk_size':base.count(), 'pg_size':data.__len__(), 'data':data}
 
         '''////////////////////////////////////'''
+        
+        dte_filters = {x:params[x] for x in params if x in dt_cols and params[x] is not None}
+        for k,v in dte_filters.items():
+            for val in v:
+                if re.search(DT_Y, val):
+                    op, val = val.split(':', 1)
+                    q = f'{k} < {val}' if op=='lt' else f'{k} <= {val}' if op=='lte' else f'{k} > {val}' if op=='gt' else f'{k} >= {val}' if op=='gte' else f'{k} == {val}'                    
+                else:
+                    q = f'{k} == {val}'
+            
+            print(q)
 
-        dte_filters = {x:params[x] for x in params if self.model.__table__.c[x].type.python_type == datetime.datetime and params[x] is not None}
+        base = base.filter(and_(
+           self.model.created > datetime.datetime(2020, 12, 12)
+        ))
+        #  text('created > 2020-12-12 00:00:00'), text('updatged > 2020-12-12 00:00:00')
+
+            # if re.search(DT_Y, v):
+
+            #     op, v = v.split(':')
+            #     print(o, v)
+            # else:
+            #     pass
+
+        print(base)
+
+        base.all()
+        
+        
         # dte_filters = {x:params[x] for x in params if x not in {"offset", "limit", "q", "sort", "action"} and isinstance(self.model.__table__.c[x].type.python_type, datetime.datetime) and params[x] is not None}
         # [f'{k} < {v}' if op=='lt' else f'{k} <= {v}' if op=='lte' else f'{k} > {v}' if op=='gt' else f'{k} >= {v}' if op=='gte' else '=' for k,v in dte_filters if re.search(DT_Y, v)]
 
-        [f'{k} = {v}' for k,v in dte_filters if not re.search(DT_Y, v)]
-        for k,v in dte_filters:
-            if re.search(DT_Y, v):
-                op, v = v.split(':')
-                [f'{k} < {v}' if op=='lt' else f'{k} <= {v}' if op=='lte' else f'{k} > {v}' if op=='gt' else f'{k} >= {v}' if op=='gte' else '=' for k,v in dte_filters]
-                op = 'lt|lte|gt|gte'
-                pass
-            filter(and_(
+        # [f'{k} = {v}' for k,v in dte_filters if not re.search(DT_Y, v)]
+        # for k,v in dte_filters:
+        #     if re.search(DT_Y, v):
+        #         op, v = v.split(':')
+        #         [f'{k} < {v}' if op=='lt' else f'{k} <= {v}' if op=='lte' else f'{k} > {v}' if op=='gt' else f'{k} >= {v}' if op=='gte' else '=' for k,v in dte_filters]
+        #         op = 'lt|lte|gt|gte'
+        #         pass
+        #     filter(and_(
 
-            ))
-
-        
+        #     ))
 
     async def update(self, id, payload, db:Session, images=None):
         db.query(self.model).filter(self.model.id==id).update(payload.dict(exclude_unset=True))
