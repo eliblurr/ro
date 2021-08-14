@@ -12,12 +12,7 @@ class Currency(BaseMixin, Base):
 
     title = Column(String, unique=True, nullable=False)
     symbol = Column(String, nullable=True, unique=True)
-
     __ts_vector__ = to_tsvector_ix('english', 'title', 'symbol')
-    # create_tsvector(
-    #     cast(func.coalesce(name, ''), postgresql.TEXT)
-    # )
-
     __table_args__ = (
         Index(
             'ix_tsv',
