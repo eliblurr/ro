@@ -2,6 +2,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI
+import config as cfg
 
 origins = ["*"]
 headers = ["*"]
@@ -23,7 +24,7 @@ def custom_openapi():
         routes=app.routes,
     )
     openapi_schema["info"]["x-logo"] = {
-        "url": "/static/logo.png"
+        "url": f"{cfg.MEDIA_URL}/images/logo.png"
     }
     app.openapi_schema = openapi_schema
     return app.openapi_schema
@@ -37,7 +38,8 @@ app.add_middleware(
     allow_methods = methods,
     allow_headers = headers,)
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount(cfg.MEDIA_URL, StaticFiles(directory=cfg.MEDIA_ROOT), name="static")
+app.mount(cfg.STATIC_URL, StaticFiles(directory=cfg.STATIC_ROOT), name="static")
 
 @app.on_event('startup')
 async def startup_event():

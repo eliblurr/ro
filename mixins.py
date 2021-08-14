@@ -12,3 +12,6 @@ class BaseMixin(object):
     @classmethod
     def c(cls):
         return [(c.name, c.type.python_type) for c in cls.__table__.columns]
+
+class GalleryMixin():
+    pass

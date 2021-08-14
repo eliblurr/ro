@@ -5,6 +5,8 @@
 *.log
 __pycache__/
 .env
-*.png
+# *.png
 *.jpeg
 *.jpg
+*.mp4
+*.mp3
