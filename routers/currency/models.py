@@ -3,7 +3,6 @@ from money.currency import Currency as C
 from database import Base, SessionLocal
 from utils import to_tsvector_ix
 from mixins import BaseMixin
-
 import sqlalchemy
 
 class Currency(BaseMixin, Base):

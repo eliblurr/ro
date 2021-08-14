@@ -24,7 +24,7 @@ def custom_openapi():
         routes=app.routes,
     )
     openapi_schema["info"]["x-logo"] = {
-        "url": f"{cfg.MEDIA_URL}/images/logo.png"
+        "url": f"{cfg.STATIC_URL}/images/logo.png"
     }
     app.openapi_schema = openapi_schema
     return app.openapi_schema
@@ -54,5 +54,7 @@ async def shutdown_event():
 from urls import *
 
 from routers.location.models import Base
+from routers.meal.models import Base
+
 from database import engine
 Base.metadata.create_all(bind=engine)

@@ -2,11 +2,13 @@ from starlette.responses import RedirectResponse
 from main import app
 
 from routers.faq.main import router as faq
+from routers.meal.main import router as meal
 from routers.policy.main import router as policy
 from routers.location.main import router as location
 from routers.currency.main import router as currency
 
 app.include_router(location, tags=['Locations'])
+app.include_router(meal, tags=['Meals'], prefix='/meals')
 app.include_router(policy, tags=['Policies'], prefix='/policies')
 app.include_router(currency, tags=['Currencies'], prefix='/currencies')
 app.include_router(faq, tags=['Frequently Asked Questions'], prefix='/frequently-asked-questions')
