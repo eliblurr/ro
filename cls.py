@@ -1,4 +1,4 @@
-from constants import Q_STR_X, SORT_STR_X, DT_X, Q_X, DT_Y
+from constants import Q_STR_X, SORT_STR_X, DT_X, Q_X, DT_Y, OPS
 from inspect import Parameter, Signature, signature
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
@@ -27,8 +27,14 @@ class CRUD:
     async def read(self, params, db:Session):
         base = db.query(self.model)
         dt_cols = [col[0] for col in self.model.c() if col[1]==datetime.datetime]
+        dte_filters = {x:params[x] for x in params if x in dt_cols and params[x] is not None}
         ext_filters = {x:params[x] for x in params if x not in ["offset", "limit", "q", "sort", "action", *dt_cols] and params[x] is not None}
+        dte_filters = [ f'{self.model.__table__.c[k]} {OPS.get(val.split(":", 1)[0], "==")} "{val.split(":", 1)[1]}"' if re.search(DT_Y, val) else f'{self.model.__table__.c[k]} == {val}' for k,v in dte_filters.items() for val in v]
+
         base = base.filter_by(**ext_filters)
+
+        if dte_filters:
+            base = base.filter(text(' AND '.join(dte_filters)))
         if params['sort']:
             sort = [f'{item[1:]} desc' if re.search(SORT_STR_X, item) else f'{item} asc' for item in params['sort']]
             base = base.order_by(text(*sort))
@@ -43,35 +49,8 @@ class CRUD:
             base = base.filter(and_(*q_and)).filter(and_(*q_or))
              
         data = base.offset(params['offset']).limit(params['limit']).all()
-        # return {'bk_size':base.count(), 'pg_size':data.__len__(), 'data':data}
-
-        '''////////////////////////////////////'''
-        
-        dte_filters = {x:params[x] for x in params if x in dt_cols and params[x] is not None}
-        for k,v in dte_filters.items():
-            for val in v:
-                if re.search(DT_Y, val):
-                    op, val = val.split(':', 1)
-                    q = f'{k} < {val}' if op=='lt' else f'{k} <= {val}' if op=='lte' else f'{k} > {val}' if op=='gt' else f'{k} >= {val}' if op=='gte' else f'{k} == {val}'                    
-                else:
-                    q = f'{k} == {val}'
+        return {'bk_size':base.count(), 'pg_size':data.__len__(), 'data':data}
             
-            print(q)
-
-        base = base.filter(and_(
-           self.model.created > datetime.datetime(2020, 12, 12)
-        ))
-        #  text('created > 2020-12-12 00:00:00'), text('updatged > 2020-12-12 00:00:00')
-
-            # if re.search(DT_Y, v):
-
-            #     op, v = v.split(':')
-            #     print(o, v)
-            # else:
-            #     pass
-
-        print(base)
-    
     async def update(self, id, payload, db:Session, images=None):
         db.query(self.model).filter(self.model.id==id).update(payload.dict(exclude_unset=True))
         db.commit()
@@ -126,4 +105,13 @@ class ContentQueryChecker:
         n_vals = [self.model.__table__.c[col].like('%' + str(val) + '%') for col in cols]
     x = [ or_(*[self.model.__table__.c[col].like('%' + str(val) + '%') for col in cols]) for val in vals ]
     base = base.filter(and_(*x))
+
+    dte_filters = [ f'{self.model.__table__.c[k]} {OPS.get(val.split(":", 1)[0], "==")} {val.split(":", 1)[1]}' if re.search(DT_Y, val) else f'{self.model.__table__.c[k]} == {val}' for k,v in dte_filters.items() for val in v]
+    for val in v for k,v in dte_filters.items()
+        for val in v:
+            if re.search(DT_Y, val):
+                op, val = val.split(':', 1)
+                q = f'{self.model.__table__.c[k]} {OPS.get(op, "==")} {val}'
+            else:
+                q = f'{self.model.__table__.c[k]} == {val}'
 '''
