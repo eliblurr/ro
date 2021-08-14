@@ -14,8 +14,8 @@ class CRUD:
 
     async def create(self, payload, db:Session, images=None):
         obj = self.model(**payload.dict())
-        # if images:
-        #     obj.images = ''
+        if images:
+            pass
         db.add(obj)
         db.commit()
         db.refresh(obj) 
