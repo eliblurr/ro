@@ -1,6 +1,8 @@
 from fastapi import Form
 import sqlalchemy as sa
-import inspect
+import inspect, secrets, os
+from io import BytesIO
+from PIL import Image
 
 def to_tsvector_ix(lang, *columns):
     s = " || ' ' || ".join(columns)
@@ -20,3 +22,20 @@ def as_form(cls):
     setattr(cls, 'as_form', _cls_)
     return cls
 
+def gen_code(nbytes=8):
+    return secrets.token_urlsafe(nbytes)
+
+def convert_image(image, directory, ext="jpg"):
+    with Image.open(BytesIO(image.file.read())) as im:
+        name = f"{gen_code()}"
+        path = f"{directory}/{name}.{ext}"
+        im.save(path)
+        return name
+
+def create_image(image, directory, size=None):
+    with Image.open(BytesIO(image)) as im:
+        name = f"{gen_code()}.jpg"
+        path = f"{directory}/{name}"
+        im.thumbnail(size if size else im.size)
+        im.save(path)
+        return name

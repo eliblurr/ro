@@ -1,3 +1,4 @@
+from routers.media.schemas import Image
 from typing import Optional, List
 from pydantic import BaseModel
 from utils import as_form
@@ -23,6 +24,7 @@ class UpdateMeal(BaseModel):
 
 class Meal(MealBase):
     id: int
+    images: List[Image]
     created: datetime.datetime
     updated: datetime.datetime
 

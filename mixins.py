@@ -18,16 +18,16 @@ class ImageMixin(BaseMixin):
     listquad = Column(String, nullable=True)
     thumbnail = Column(String, nullable=True)
 
-    @declared_attr
-    def p_id(cls):
-        return Column('%s_id' % cls.p_name, Integer, ForeignKey( "%s.id" % cls.p_table ))
+    # @declared_attr
+    # def p_id(cls):
+    #     return Column('%s_id' % cls.p_name, Integer, ForeignKey( "%s.id" % cls.p_table ))
 
-class RatingMixin(BaseMixin):
-    value = Column(Float, nullable=False)
+# class RatingMixin(BaseMixin):
+#     value = Column(Float, nullable=False)
 
-    @declared_attr
-    def p_id(cls):
-        return Column('%s_id' % cls.p_name, Integer, ForeignKey( "%s.id" % cls.p_table ))
+#     @declared_attr
+#     def p_id(cls):
+#         return Column('%s_id' % cls.p_name, Integer, ForeignKey( "%s.id" % cls.p_table ))
 
     # @declared_attr
     # def a_id(cls):

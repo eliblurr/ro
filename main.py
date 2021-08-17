@@ -38,7 +38,7 @@ app.add_middleware(
     allow_methods = methods,
     allow_headers = headers,)
 
-app.mount(cfg.MEDIA_URL, StaticFiles(directory=cfg.MEDIA_ROOT), name="static")
+app.mount(cfg.MEDIA_URL, StaticFiles(directory=cfg.MEDIA_ROOT), name="media")
 app.mount(cfg.STATIC_URL, StaticFiles(directory=cfg.STATIC_ROOT), name="static")
 
 @app.on_event('startup')

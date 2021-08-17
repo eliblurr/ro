@@ -11,19 +11,19 @@ class Currency(BaseMixin, Base):
 
     title = Column(String, unique=True, nullable=False)
     symbol = Column(String, nullable=True, unique=True)
-    __ts_vector__ = to_tsvector_ix('english', 'title', 'symbol')
-    __table_args__ = (
-        Index(
-            'ix_tsv',
-            to_tsvector_ix('english', 'title', 'symbol'),
-            postgresql_using='gin'
-            ),
-            Index(
-                'idx_person_fts',
-                __ts_vector__,
-                postgresql_using='gin'
-            ),
-        )
+    # __ts_vector__ = to_tsvector_ix('english', 'title', 'symbol')
+    # __table_args__ = (
+    #     Index(
+    #         'ix_tsv',
+    #         to_tsvector_ix('english', 'title', 'symbol'),
+    #         postgresql_using='gin'
+    #         ),
+    #         Index(
+    #             'idx_person_fts',
+    #             __ts_vector__,
+    #             postgresql_using='gin'
+    #         ),
+    #     )
 
 @event.listens_for(Currency.__table__, 'after_create')
 def insert_initial_values(*args, **kwargs):

@@ -1,12 +1,17 @@
 from constants import Q_STR_X, SORT_STR_X, DT_X, Q_X, DT_Y, OPS
 from inspect import Parameter, Signature, signature
+from routers.media.models import Image as IM
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 from sqlalchemy.sql import text
+import re, datetime, shutil, os
+from config import MEDIA_ROOT
 from functools import wraps
-from fastapi import Query
+from utils import gen_code
+from fastapi import Query, Depends
 from typing import List
-import re, datetime
+from PIL import Image
+import utils, config as cfg
 
 class CRUD:
     def __init__(self, model):
@@ -15,7 +20,14 @@ class CRUD:
     async def create(self, payload, db:Session, images=None):
         obj = self.model(**payload.dict())
         if images:
-            pass
+            obj.images.extend([
+                IM(
+                    detail =  f"{cfg.IMAGE_URL}{utils.create_image(image_b, cfg.IMAGE_ROOT)}", 
+                    small = f"{cfg.IMAGE_URL}{utils.create_image(image_b, cfg.IMAGE_ROOT, cfg.SMALL)}",
+                    listquad = f"{cfg.IMAGE_URL}{utils.create_image(image_b, cfg.IMAGE_ROOT, cfg.LISTQUAD)}",
+                    thumbnail = f"{cfg.IMAGE_URL}{utils.create_image(image_b, cfg.IMAGE_ROOT, cfg.THUMBNAIL)}", 
+                ) for image_b in [image.file.read() for image in images]
+            ])
         db.add(obj)
         db.commit()
         db.refresh(obj) 
@@ -89,6 +101,32 @@ class ContentQueryChecker:
             params.extend([Parameter('action', Parameter.KEYWORD_ONLY, annotation=str, default=Query(None))])
         wrapper.__signature__ = Signature(params)
         return wrapper
+
+class Folder:
+    def __init__(self, base_dir, name):
+        self.base_dir = base_dir
+        self.name = name
+
+    def __call__(self):
+        return os.mkdir(f'{self.base_dir}/{self.name}')
+
+    def delete(self):
+        return shutil.rmtree(f'{self.base_dir}/{self.name}')
+
+    def rename(self, name):
+        try:
+            os.rename(self.name, new_name)
+        except Exception as e:
+            print(e.__class__)
+        else:
+            self.name = name
+
+    def path(self):
+        return f'{self.base_dir}/{self.name}'
+
+class ImageCustom:
+    def __init__(self):
+        pass
 
 '''
     NOTES
