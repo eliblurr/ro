@@ -1,23 +1,23 @@
 from sqlalchemy import Column, String, Integer, Float, ForeignKey
 from sqlalchemy.orm import relationship
 from routers.media.models import Image
+from routers.meal.models import Meal
 from mixins import BaseMixin
 from database import Base
 
-class Meal(BaseMixin, Base):
-    '''Meal Model'''
-    __tablename__ = "meals"
+class Menu(BaseMixin, Base):
+    '''Menu Model'''
+    __tablename__ = "menus"
 
-    cost = Column(Float, nullable=False)
     title = Column(String, nullable=False)
     metatitle = Column(String, nullable=True)
     description = Column(String, nullable=False)
     restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
     images = relationship('Image', uselist=True, cascade="all, delete")
-#     ratings = relationship('MealRating', backref="meal", uselist=True, cascade="all, delete")
+    meals = relationship('Meal', secondary='menu_meals', backref='menu', lazy='dynamic')
 
-# class MealRating(RatingMixin, Base):
-#     '''Meal Rating Model'''
-#     __tablename__ = "meal_ratings"
-#     p_name, p_table = Meal.__name__.lower(), Meal.__tablename__
-#     # a_name, a_table = 'a', 'b' # author
+class MenuMeal(Base):
+    __tablename__ = "menu_meals"
+
+    menu_id = Column(Integer, ForeignKey('menus.id'), primary_key=True)
+    meal_id = Column(Integer, ForeignKey('meals.id'), primary_key=True)

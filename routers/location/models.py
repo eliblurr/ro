@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 from ..currency.models import Currency
+from routers.restaurant.models import Restaurant
 from mixins import BaseMixin
 from database import Base
 
@@ -26,3 +27,4 @@ class City(BaseMixin, Base):
     title = Column(String, nullable=False, unique=True)
     postcode = Column(String, nullable=True, unique=False)
     subcountry_id = Column(Integer, ForeignKey('subcountries.id'))
+    restaurants = relationship('Restaurant', backref="city", uselist=True, cascade="all, delete", lazy='dynamic')

@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, DateTime, Boolean, String, ForeignKey, Float
 from sqlalchemy.ext.declarative import declared_attr
+from utils import to_tsvector_ix
 import datetime
 
 class BaseMixin(object):    
@@ -18,9 +19,43 @@ class ImageMixin(BaseMixin):
     listquad = Column(String, nullable=True)
     thumbnail = Column(String, nullable=True)
 
-    # @declared_attr
-    # def p_id(cls):
-    #     return Column('%s_id' % cls.p_name, Integer, ForeignKey( "%s.id" % cls.p_table ))
+class FullTextSearchMixin(object):
+    # full text search here
+
+    pass 
+    # __ts_vector__ = to_tsvector_ix('english', *cols)
+    # __table_args__ = (
+    #     Index(
+    #         'ix_tsv',
+    #         to_tsvector_ix('english', 'title', 'symbol'),
+    #         postgresql_using='gin'
+    #         ),
+    #         Index(
+    #             'ix_full_text_search',
+    #             __ts_vector__,
+    #             postgresql_using='gin'
+    #         ),
+    #     )
+
+    # __ts_vector__ = to_tsvector_ix('english', 'title', 'symbol')
+    # __table_args__ = (
+    #     Index(
+    #         'ix_tsv',
+    #         to_tsvector_ix('english', 'title', 'symbol'),
+    #         postgresql_using='gin'
+    #         ),
+    #         Index(
+    #             'idx_person_fts',
+    #             __ts_vector__,
+    #             postgresql_using='gin'
+    #         ),
+    #     )
+
+    # option 1
+    # @classmethod
+    # def fulltext_search(cls, session, search_string, field):
+    #     return session.query(cls).filter(func.to_tsvector('english', getattr(cls, field)).match(search_string, postgresql_regconfig='english')).all()
+
 
 # class RatingMixin(BaseMixin):
 #     value = Column(Float, nullable=False)

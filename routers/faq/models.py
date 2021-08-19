@@ -1,5 +1,4 @@
 from sqlalchemy import Column, String, Integer
-from utils import to_tsvector_ix
 from mixins import BaseMixin
 from database import Base
 

@@ -20,6 +20,10 @@ class Image(ImageMixin, Base):
     )
 
     meal_id = Column(Integer, ForeignKey('meals.id'))
+    menu_id = Column(Integer, ForeignKey('menus.id'))
+    category_id = Column(Integer, ForeignKey('categories.id'))
+    restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
+    
     col1 = Column(Integer)
     col2 = Column(Integer)
     col3 = Column(Integer)
