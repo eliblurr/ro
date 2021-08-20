@@ -10,16 +10,18 @@ class Image(ImageMixin, Base):
         CheckConstraint(
             """
                 (
-                    (meal_id IS NOT NULL AND COALESCE(menu_id, category_id, restaurant_id) IS NULL) 
-                OR  (menu_id IS NOT NULL AND COALESCE(meal_id, category_id, restaurant_id) IS NULL) 
-                OR  (category_id IS NOT NULL AND COALESCE(menu_id, meal_id, restaurant_id) IS NULL) 
-                OR  (restaurant_id IS NOT NULL AND COALESCE(menu_id, meal_id, category_id) IS NULL) 
+                    (ad_id IS NOT NULL AND COALESCE(meal_id, menu_id, category_id, restaurant_id) IS NULL)
+                OR  (meal_id IS NOT NULL AND COALESCE(ad_id, menu_id, category_id, restaurant_id) IS NULL) 
+                OR  (menu_id IS NOT NULL AND COALESCE(meal_id, ad_id, category_id, restaurant_id) IS NULL) 
+                OR  (category_id IS NOT NULL AND COALESCE(meal_id, menu_id, ad_id, restaurant_id) IS NULL) 
+                OR  (restaurant_id IS NOT NULL AND COALESCE(meal_id, menu_id, category_id, ad_id) IS NULL) 
                 ) 
-                AND COALESCE(meal_id, menu_id, category_id, restaurant_id) IS NOT NULL
+                AND COALESCE(ad_id, meal_id, menu_id, category_id, restaurant_id) IS NOT NULL
             """
         , name="ck_img_assoc_single_fk_allowed"),
     )
 
+    ad_id = Column(Integer, ForeignKey('ads.id'))
     meal_id = Column(Integer, ForeignKey('meals.id'))
     menu_id = Column(Integer, ForeignKey('menus.id'))
     category_id = Column(Integer, ForeignKey('categories.id'))
