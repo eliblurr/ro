@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Float, ForeignKey
+from sqlalchemy import Column, String, Integer, Float, ForeignKey, Enum
 from mixins import BaseMixin
 from utils import gen_code
 from database import Base

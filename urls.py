@@ -1,20 +1,28 @@
 from starlette.responses import RedirectResponse
 from main import app
 
+from routers.ad.main import router as ad
 from routers.faq.main import router as faq
 from routers.meal.main import router as meal
 from routers.table.main import router as table
+from routers.media.main import router as media
 from routers.policy.main import router as policy
 from routers.voucher.main import router as voucher
 from routers.location.main import router as location
 from routers.currency.main import router as currency
+from routers.category.main import router as category
+from routers.restaurant.main import router as restaurant
 
 app.include_router(location, tags=['Locations'])
+app.include_router(ad, tags=['Adverts'], prefix='/ads')
 app.include_router(meal, tags=['Meals'], prefix='/meals')
 app.include_router(table, tags=['Table'], prefix='/tables')
+app.include_router(media, tags=['Media'], prefix='/uploads')
 app.include_router(policy, tags=['Policies'], prefix='/policies')
 app.include_router(voucher, tags=['Vouchers'], prefix='/vouchers')
 app.include_router(currency, tags=['Currencies'], prefix='/currencies')
+app.include_router(category, tags=['Categories'], prefix='/categories')
+app.include_router(restaurant, tags=['Restaurant'], prefix='/restaurants')
 app.include_router(faq, tags=['Frequently Asked Questions'], prefix='/frequently-asked-questions')
 
 from fastapi.openapi.docs import (
@@ -22,7 +30,7 @@ from fastapi.openapi.docs import (
     get_swagger_ui_html,
     get_swagger_ui_oauth2_redirect_html,)
 
-@app.get('/', name='Home', tags=['Docs'])
+@app.get('/', name='Home', tags=['Docs'], include_in_schema=False)
 async def redoc_html():
     return get_redoc_html(
         openapi_url=app.openapi_url,

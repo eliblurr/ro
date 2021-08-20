@@ -124,10 +124,6 @@ class Folder:
     def path(self):
         return f'{self.base_dir}/{self.name}'
 
-class ImageCustom:
-    def __init__(self):
-        pass
-
 '''
     NOTES
     # 1. exact filter *
