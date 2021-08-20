@@ -19,18 +19,16 @@ class OrderMealState(enum.Enum):
     preparing = 'preparing'
     cancelled = 'cancelled'
 
-
 class OrderMeal(Base):
     '''Order Meal Association Model'''
     __tablename__ = "order_meals"
 
-    sub_total = 90
     meal = relationship('Meal')
-    quantity = Column(Integer, nullable=False)
-    # sub_total = column_property(meal.cost*quantity)
-    meal_id = Column(Integer, ForeignKey('meals.id'), nullable=False)
+    quantity = Column(Integer, nullable=False)    
+    meal_id = Column(Integer, ForeignKey('meals.id'), primary_key=True)
     order_id = Column(Integer, ForeignKey('orders.id'), primary_key=True)
     status = Column(Enum(OrderMealState), default=OrderMealState.pending, nullable=False) 
+    sub_total = column_property((select(Meal.cost).where(Meal.id==meal_id).correlate_except(Meal).scalar_subquery()) * quantity)
     
 class Order(BaseMixin, Base):
     '''Order Model'''
@@ -47,8 +45,7 @@ class Order(BaseMixin, Base):
             OrderMeal.status==OrderMealState.served, OrderMeal.order_id==id
         )).correlate_except(OrderMeal).scalar_subquery()
     )    
-    total_to_pay = 90
-    # total_to_pay = column_property(total-voucher.discount(total))
+    total_to_pay = column_property(total - ((select(Voucher.discount).where(Voucher.order_id==id).correlate_except(Voucher).scalar_subquery()) * total))
     
     # payment
     # paymentMethod
