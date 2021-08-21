@@ -14,6 +14,7 @@ class Meal(BaseMixin, Base):
     description = Column(String, nullable=False)
     restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
     images = relationship('Image', uselist=True, cascade="all, delete")
+    # currency = relationship[m:1]->custom join
 #     ratings = relationship('MealRating', backref="meal", uselist=True, cascade="all, delete")
 
 # class MealRating(RatingMixin, Base):
