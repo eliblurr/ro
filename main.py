@@ -9,27 +9,12 @@ headers = ["*"]
 methods = ["*"]
 
 app = FastAPI(
+    title="Restaurant Order API Service",
     redoc_url=None, 
     docs_url=None,
+    version="1.1.0",
     openapi_url='/openapi.json',
 )
-
-def custom_openapi():
-    if app.openapi_schema:
-        return app.openapi_schema
-    openapi_schema = get_openapi(
-        title="Restaurant Order API Service",
-        version="2.0.0",
-        description="API documentation for food ordering service in restaurants",
-        routes=app.routes,
-    )
-    openapi_schema["info"]["x-logo"] = {
-        "url": f"{cfg.STATIC_URL}/images/logo.png"
-    }
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
-
-app.openapi = custom_openapi
 
 app.add_middleware(
     CORSMiddleware,

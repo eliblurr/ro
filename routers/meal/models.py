@@ -14,11 +14,13 @@ class Meal(BaseMixin, Base):
     description = Column(String, nullable=False)
     restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
     images = relationship('Image', uselist=True, cascade="all, delete")
+    # ratings = relationship('MealRating', backref="meal", uselist=True, cascade="all, delete")
     # currency = relationship[m:1]->custom join
-#     ratings = relationship('MealRating', backref="meal", uselist=True, cascade="all, delete")
 
 # class MealRating(RatingMixin, Base):
 #     '''Meal Rating Model'''
 #     __tablename__ = "meal_ratings"
 #     p_name, p_table = Meal.__name__.lower(), Meal.__tablename__
 #     # a_name, a_table = 'a', 'b' # author
+
+# q = select(Country.currency).join(Region).join(City).join(Restaurant).join(Meal).join(Region).where()

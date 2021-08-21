@@ -1,5 +1,8 @@
+from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html, get_swagger_ui_oauth2_redirect_html
 from starlette.responses import RedirectResponse
+from fastapi.openapi.utils import get_openapi
 from main import app
+import config as cfg
 
 from routers.ad.main import router as ad
 from routers.faq.main import router as faq
@@ -34,22 +37,46 @@ from fastapi.openapi.docs import (
 
 @app.get('/', name='Home', tags=['Docs'], include_in_schema=False)
 async def redoc_html():
+    def custom_openapi():
+        openapi_schema = get_openapi(
+            title=app.title,
+            version=app.version,
+            description="API documentation for food ordering service in restaurants \n\n <a href='/docs' style='color:hotpink;cursor:help'>Interactive Swagger docs</a>",
+            routes=app.routes,
+        )
+        openapi_schema["info"]["x-logo"] = {
+            "url": f"{cfg.STATIC_URL}/images/logo.png"
+        }
+        app.openapi_schema = openapi_schema
+        return app.openapi_schema
+    app.openapi = custom_openapi
     return get_redoc_html(
         openapi_url=app.openapi_url,
         title=app.title + " - ReDoc",
         redoc_js_url="/static/js/redoc.standalone.js",
+        redoc_favicon_url=f"{cfg.STATIC_URL}/images/logo.png"
     )
 
 @app.get("/docs", include_in_schema=False)
 async def custom_swagger_ui_html():
+    def custom_openapi():
+        openapi_schema = get_openapi(
+            title=app.title,
+            version=app.version,
+            description="API documentation for food ordering service in restaurants \n\n <a href='/' style='color:hotpink;cursor:help'>see official API docs</a>",
+            routes=app.routes,
+        )
+        openapi_schema["info"]["x-logo"] = {
+            "url": f"{cfg.STATIC_URL}/images/logo.png"
+        }
+        app.openapi_schema = openapi_schema
+        return app.openapi_schema
+    app.openapi = custom_openapi
     return get_swagger_ui_html(
         openapi_url=app.openapi_url,
         title=app.title + " - Swagger UI",
         oauth2_redirect_url=app.swagger_ui_oauth2_redirect_url,
+        swagger_favicon_url=f"{cfg.STATIC_URL}/images/logo.png",
         swagger_js_url="/static/js/swagger-ui-bundle.js",
         swagger_css_url="/static/css/swagger-ui.css",
     )
-
-@app.get(app.swagger_ui_oauth2_redirect_url, include_in_schema=False)
-async def swagger_ui_redirect():
-    return get_swagger_ui_oauth2_redirect_html()
