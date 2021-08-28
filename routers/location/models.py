@@ -19,7 +19,7 @@ class SubCountry(BaseMixin, Base):
     title = Column(String, nullable=False, unique=True)
     postcode = Column(String, nullable=True, unique=True)
     country_id = Column(Integer, ForeignKey('countries.id'))
-    country = relationship('Country', back_populates="subcountry", lazy='dynamic')
+    country = relationship('Country', back_populates="subcountry")
     cities = relationship('City', back_populates="subcountry", uselist=True, cascade="all, delete", lazy='dynamic')
 
 class City(BaseMixin, Base):
@@ -28,5 +28,5 @@ class City(BaseMixin, Base):
     title = Column(String, nullable=False, unique=True)
     postcode = Column(String, nullable=True, unique=False)
     subcountry_id = Column(Integer, ForeignKey('subcountries.id'))
-    subcountry = relationship('SubCountry', back_populates="cities", lazy='dynamic')
+    subcountry = relationship('SubCountry', back_populates="cities")
     restaurants = relationship('Restaurant', backref="city", uselist=True, cascade="all, delete", lazy='dynamic')
