@@ -5,8 +5,8 @@ from dependencies import get_db
 from . import crud, schemas
 
 router = APIRouter()
-
-@router.post('/', description='', response_model=schemas.Order, status_code=201, name='Order')
+#  response_model=schemas.Order, 
+@router.post('/', description='', status_code=201, name='Order')
 async def create(payload:schemas.CreateOrder, db:Session=Depends(get_db)):
     return await crud.order.create(payload, db)
 

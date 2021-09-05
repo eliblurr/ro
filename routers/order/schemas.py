@@ -3,6 +3,9 @@ from routers.meal.schemas import Meal
 from typing import Optional, List, Union
 from pydantic import BaseModel
 import datetime, enum
+import routers.order.models as  m
+
+from routers.voucher.schemas import Voucher, A
 
 class OrderState(str, enum.Enum):
     active = 'active'
@@ -18,6 +21,9 @@ class OrderMealState(str, enum.Enum):
 class CreateOrderMeal(BaseModel):
     meal_id: int
     quantity: int
+
+    class Meta:
+        model = m.OrderMeal
 
 class UpdateOrderMeal(BaseModel):
     meal_id: int
@@ -39,6 +45,12 @@ class CreateOrder(OrderBase):
     table_id: int
     voucher_id: Optional[int]
     meals: List[CreateOrderMeal]
+
+    class Config:
+        orm_mode = True
+
+    class Meta:
+        model = m.Order
 
 class UpdateOrder(BaseModel):
     table_id: Optional[int]

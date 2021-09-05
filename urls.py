@@ -80,7 +80,7 @@ async def custom_swagger_ui_html():
         swagger_js_url="/static/js/swagger-ui-bundle.js",
         swagger_css_url="/static/css/swagger-ui.css",
     )
-
+'''
 from pydantic import BaseModel
 from typing import List, Optional
 from routers.currency.models import Currency
@@ -126,4 +126,4 @@ print(Form.__annotations__)
 
 @app.post("/test")
 async def test():
-    pass
+    pass'''
