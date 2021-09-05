@@ -113,3 +113,17 @@ async def test(payload:B):
         return schema_to_model(payload, exclude_unset=True)
     except AttributeError as e:
         raise HTTPException(status_code=500, detail= http_exception_detail(loc=('string'), msg=e.__str__(), type=f"{e.__class__.__name__}"))
+
+from fastapi import Form
+
+class CommonQueryParams:
+    def __init__(self, q: Optional[str] = None, skip: int = 0, limit: int = 100):
+        self.q = q
+        self.skip = skip
+        self.limit = limit
+
+print(Form.__annotations__)
+
+@app.post("/test")
+async def test():
+    pass
