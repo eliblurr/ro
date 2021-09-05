@@ -82,7 +82,7 @@ async def custom_swagger_ui_html():
     )
 
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 from routers.currency.models import Currency
 from utils import schema_to_model, http_exception_detail
 from fastapi import HTTPException
@@ -97,11 +97,11 @@ class A(BaseModel):
     symbol: str
     title: List[Z]
 
-    # class Meta:
-    #     model = Currency
+    class Meta:
+        model = Currency
 
 class B(BaseModel):
-    symbol: str
+    symbol: Optional[str]
     title: A
 
     class Meta:
@@ -110,6 +110,6 @@ class B(BaseModel):
 @app.post("/test")
 async def test(payload:B):
     try:
-        return schema_to_model(payload)
+        return schema_to_model(payload, exclude_unset=True)
     except AttributeError as e:
         raise HTTPException(status_code=500, detail= http_exception_detail(loc=('string'), msg=e.__str__(), type=f"{e.__class__.__name__}"))
