@@ -40,7 +40,9 @@ class Order(BaseMixin, Base):
     table_id = Column(Integer, ForeignKey('tables.id'))
     voucher = relationship('Voucher', back_populates="order")
     order_code = Column(String, nullable=False, default=gen_code)
+    restaurant = relationship("Restaurant", back_populates="orders")
     voucher_id = Column(Integer, ForeignKey('vouchers.id'), unique=True)
+    restaurant_id = Column(Integer, ForeignKey('restaurants.id'), unique=True) 
     status = Column(Enum(OrderState), default=OrderState.active, nullable=False) 
     served_total = column_property(
         select(func.sum(OrderMeal.sub_total)).
@@ -54,6 +56,10 @@ class Order(BaseMixin, Base):
         if self.voucher:
             return total - (self.voucher.discount*total)
         return total
+    
+    @hybrid_property
+    def currency(self):
+        return self.restaurant.city.subcountry.country.currency.title
     
     # check constraint on table and status
     # if order closed lock

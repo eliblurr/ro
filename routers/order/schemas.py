@@ -48,6 +48,7 @@ class CreateOrder(OrderBase):
     table_id: int
     voucher_id: Optional[int]
     meals: List[CreateOrderMeal]
+    restaurant_id: int
 
     class Config:
         orm_mode = True
@@ -63,6 +64,7 @@ class UpdateOrder(BaseModel):
 class Order(OrderBase):
     id: int
     total: float
+    currency: Union[str, None]
     served_total: Union[float, None]
     # created: datetime.datetime
     # updated: datetime.datetime
