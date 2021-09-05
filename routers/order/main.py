@@ -15,11 +15,16 @@ async def create(payload:schemas.CreateOrder, db:Session=Depends(get_db)):
 async def read(db:Session=Depends(get_db), **params):
     return await crud.order.read(params, db)
 
+@router.get('/meals', description='', response_model=schemas.OrderList, name='Meals')
+@ContentQueryChecker(crud.order_meal.model.c(), None)
+async def read(db:Session=Depends(get_db), **params):
+    return await crud.order_meal.read(params, db)
+
 @router.get('/{resource_id}', description='', response_model=schemas.Order, name='Order')
 async def read_by_id(resource_id:int, db:Session=Depends(get_db)):
     return await crud.order.read_by_id(resource_id, db)
 
-@router.patch('/{resource_id}', description='', response_model=schemas.Order, name='Order')
+@router.put('/{resource_id}', description='', response_model=schemas.Order, name='Order')
 async def update(resource_id:int, payload:schemas.UpdateOrder, db:Session=Depends(get_db)):
     return await crud.order.update(resource_id, payload, db)
 

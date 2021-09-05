@@ -39,3 +39,32 @@ def create_image(image, directory, size=None):
         im.thumbnail(size if size else im.size)
         im.save(path)
         return name
+
+def is_pydantic(obj: object):
+    """Checks whether an object is pydantic."""
+    return type(obj).__class__.__name__ == "ModelMetaclass"
+
+def schema_to_model(schema):
+    """Iterates through pydantic schema and parses nested schemas
+    to a dictionary containing SQLAlchemy models.
+    Only works if nested schemas have specified the Meta.model."""
+    parsed_schema = dict(schema)
+    try:
+        for k,v in parsed_schema.items():
+            if isinstance(v, list) and len(v) and is_pydantic(v):
+                parsed_schema[k] = [item.Meta.model(**to_model(item)) for item in v]
+            elif is_pydantic(v):
+                parsed_schema[k] = v.Meta.model(**to_model(v))
+    except AttributeError:
+        raise AttributeError(f"found nested pydantic model in {schema.__class__} but Meta.model was not specified.")
+    return parsed_schema
+
+def http_exception_detail(loc=None, msg=None, type=None):
+    detail = {}
+    if loc:
+        detail.update({"loc":loc if loc.__class__ in [list, set, tuple] else [loc]})
+    if msg:
+        detail.update({"msg":msg})
+    if msg:
+        detail.update({"type":type})
+    return [detail]

@@ -3,15 +3,16 @@ from sqlalchemy.ext.declarative import declared_attr
 from utils import to_tsvector_ix
 import datetime
 
-class BaseMixin(object):    
+class BaseMethodMixin(object):
+    @classmethod
+    def c(cls):
+        return [(c.name, c.type.python_type) for c in cls.__table__.columns]
+
+class BaseMixin(BaseMethodMixin):    
     status = Column(Boolean, default=True)
     created = Column(DateTime, default=datetime.datetime.utcnow)
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     updated = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
-    
-    @classmethod
-    def c(cls):
-        return [(c.name, c.type.python_type) for c in cls.__table__.columns]
 
 class ImageMixin(BaseMixin):
     small = Column(String, nullable=True)

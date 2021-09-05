@@ -1,35 +1,49 @@
 from routers.voucher.schemas import Voucher
 from routers.meal.schemas import Meal
-from typing import Optional, List
+from typing import Optional, List, Union
 from pydantic import BaseModel
-import datetime
+import datetime, enum
 
-# meals = relationship('OrderMeal', uselist=True)
-# voucher = relationship('Voucher', uselist=False)
-# table_id = Column(Integer, ForeignKey('tables.id'))
-# # order_code = Column(String, nullable=False, default=gen_code)
-# status = Column(Enum(OrderState), default=OrderState.active, nullable=False) 
-# total = column_property(
-#     select(func.sum(OrderMeal.sub_total)).
-#     where(and_(
-#         OrderMeal.status==OrderMealState.served, OrderMeal.order_id==id
-#     )).correlate_except(OrderMeal).scalar_subquery()
-# )    
-# total_to_pay = column_property(total-voucher.discount(total))
+class OrderState(str, enum.Enum):
+    active = 'active'
+    completed = 'completed'
+    cancelled = 'cancelled'
 
+class OrderMealState(str, enum.Enum):
+    ready = 'ready'
+    served = 'served'
+    pending = 'pending'
+    preparing = 'preparing'
+
+class CreateOrderMeal(BaseModel):
+    meal_id: int
+    quantity: int
+
+class UpdateOrderMeal(BaseModel):
+    meal_id: int
+    quantity: Optional[int]
+    status: Optional[OrderMealState]
+    
+class OrderMeal(BaseModel):
+    meal: Meal
+    status: OrderMealState
+    quantity: Optional[int]
+
+    class Config:
+        orm_mode = True
 
 class OrderBase(BaseModel):
-    status: Optional[bool]
+    status: Optional[OrderState]
 
 class CreateOrder(OrderBase):
     table_id: int
+    voucher_id: Optional[int]
+    meals: List[CreateOrderMeal]
 
 class UpdateOrder(BaseModel):
-    title: str
-    description: str
-    status: Optional[bool]
-    metatitle: Optional[str]
-    restaurant_id: Optional[int]
+    table_id: Optional[int]
+    voucher_id: Optional[int]
+    meals: Optional[Union[CreateOrderMeal, UpdateOrderMeal]]
 
 class Order(OrderBase):
     id: int
@@ -38,7 +52,7 @@ class Order(OrderBase):
     created: datetime.datetime
     updated: datetime.datetime
     voucher: Optional[Voucher]
-    meals: Optional[List[Meal]]
+    meals: Optional[List[OrderMeal]]
 
     class Config:
         orm_mode = True

@@ -32,7 +32,7 @@ class CRUD:
         db.commit()
         db.refresh(obj) 
         return obj  
-
+        
     async def read_by_id(self, id, db:Session):
         return db.query(self.model).filter(self.model.id==id).first()
 
@@ -64,12 +64,26 @@ class CRUD:
         return {'bk_size':base.count(), 'pg_size':data.__len__(), 'data':data}
             
     async def update(self, id, payload, db:Session, images=None):
-        db.query(self.model).filter(self.model.id==id).update(payload.dict(exclude_unset=True))
+        rows = db.query(self.model).filter(self.model.id==id).update(payload.dict(exclude_unset=True), synchronize_session="fetch")
         db.commit()
         return await self.read_by_id(id, db)
 
-    async def delete(self, id, db:Session, im_id=None):
-        rows = db.query(self.model).filter(self.model.id==id).delete()
+    async def delete(self, id, db:Session):
+        rows = db.query(self.model).filter(self.model.id==id).delete(synchronize_session=False)
+        db.commit()
+        return rows
+
+    async def bk_create(self, payload, db:Session):
+        db.add_all([self.model(**payload.dict()) for payload in payload])
+        db.commit()
+
+    async def bk_update(self, payload, db:Session, **kwargs):
+        rows = db.query(self.model).filter_by(**kwargs).update(payload.dict(exclude_unset=True), synchronize_session="fetch")
+        db.commit()
+        return rows
+
+    async def bk_delete(self, ids:list, db:Session):
+        rows = db.query(self.model).filter(self.model.id.in_(ids)).delete(synchronize_session=False)
         db.commit()
         return rows
 
@@ -132,6 +146,14 @@ class Folder:
     # 4. date filter
     # 5. sort *
     # 6. offset & limit *
+
+    # try:
+    #     db.add(obj)
+    # except:
+    #     db.rollback()
+    # else:
+    #     db.commit()
+    #     db.refresh(obj) 
 
     cols = [col[0] for col in self.model.c()]
     vals =  ['string1', 'string2']

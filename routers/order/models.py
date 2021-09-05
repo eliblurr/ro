@@ -1,8 +1,8 @@
 from sqlalchemy import Column, String, Integer, Enum, select, func, and_, ForeignKey
 from sqlalchemy.orm import relationship, column_property
+from mixins import BaseMixin, BaseMethodMixin
 from routers.voucher.models import Voucher
 from routers.meal.models import Meal
-from mixins import BaseMixin
 from utils import gen_code
 from database import Base
 import enum
@@ -17,14 +17,15 @@ class OrderMealState(enum.Enum):
     served = 'served'
     pending = 'pending'
     preparing = 'preparing'
-    cancelled = 'cancelled'
 
-class OrderMeal(Base):
+# countable & non countable
+
+class OrderMeal(BaseMethodMixin, Base):
     '''Order Meal Association Model'''
     __tablename__ = "order_meals"
 
     meal = relationship('Meal')
-    quantity = Column(Integer, nullable=False)    
+    quantity = Column(Integer, nullable=False) # ->   translates to number of occrences
     meal_id = Column(Integer, ForeignKey('meals.id'), primary_key=True)
     order_id = Column(Integer, ForeignKey('orders.id'), primary_key=True)
     status = Column(Enum(OrderMealState), default=OrderMealState.pending, nullable=False) 
@@ -47,6 +48,8 @@ class Order(BaseMixin, Base):
     )    
     total_to_pay = column_property(total - ((select(Voucher.discount).where(Voucher.order_id==id).correlate_except(Voucher).scalar_subquery()) * total))
     
+    # check constraint on table and status
+    # if order closed lock
     # payment
     # paymentMethod
     # paymentMethodId

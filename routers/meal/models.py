@@ -23,4 +23,13 @@ class Meal(BaseMixin, Base):
 #     p_name, p_table = Meal.__name__.lower(), Meal.__tablename__
 #     # a_name, a_table = 'a', 'b' # author
 
+# from sqlalchemy.orm import relationship, column_property
+
+# total = column_property(
+#         select(Currency).
+#         where(and_(
+#             OrderMeal.status==OrderMealState.served, OrderMeal.order_id==id
+#         )).correlate_except(OrderMeal).scalar_subquery()
+#     )    
+
 # q = select(Country.currency).join(Region).join(City).join(Restaurant).join(Meal).join(Region).where()
