@@ -5,7 +5,7 @@ from pydantic import BaseModel
 import datetime, enum
 import routers.order.models as  m
 
-from routers.voucher.schemas import Voucher, A
+from routers.voucher.schemas import Voucher
 
 class OrderState(str, enum.Enum):
     active = 'active'
