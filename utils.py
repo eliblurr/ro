@@ -51,7 +51,7 @@ def schema_to_model(schema, exclude_unset=False):
     parsed_schema = dict(schema)
     try:
         for k,v in parsed_schema.items():
-            if isinstance(v, list) and len(v) and is_pydantic(v):
+            if isinstance(v, list) and len(v) and is_pydantic(v[0]):
                 parsed_schema[k] = [item.Meta.model(**schema_to_model(item)) for item in v]
             elif is_pydantic(v):
                 parsed_schema[k] = v.Meta.model(**schema_to_model(v))
