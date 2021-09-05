@@ -1,5 +1,6 @@
 from sqlalchemy import Column, String, Integer, Enum, select, func, and_, ForeignKey
 from sqlalchemy.orm import relationship, column_property
+from sqlalchemy.ext.hybrid import hybrid_property
 from mixins import BaseMixin, BaseMethodMixin
 from routers.voucher.models import Voucher
 from routers.meal.models import Meal
@@ -41,13 +42,18 @@ class Order(BaseMixin, Base):
     order_code = Column(String, nullable=False, default=gen_code)
     voucher_id = Column(Integer, ForeignKey('vouchers.id'), unique=True)
     status = Column(Enum(OrderState), default=OrderState.active, nullable=False) 
-    total = column_property(
+    served_total = column_property(
         select(func.sum(OrderMeal.sub_total)).
-        where(and_(
-            OrderMeal.status==OrderMealState.served, OrderMeal.order_id==id
-        )).correlate_except(OrderMeal).scalar_subquery()
-    )  
-    total_to_pay = column_property(total - ((select(Voucher.discount).where(Voucher.id==voucher_id).correlate_except(Voucher).scalar_subquery()) * total))
+        where(and_(OrderMeal.status==OrderMealState.served, OrderMeal.order_id==1)).
+        correlate_except(OrderMeal).scalar_subquery()
+    )
+
+    @hybrid_property
+    def total(self):
+        total = self.served_total if self.served_total is not None else 0
+        if self.voucher:
+            return total - (self.voucher.discount*total)
+        return total
     
     # check constraint on table and status
     # if order closed lock

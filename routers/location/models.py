@@ -29,4 +29,4 @@ class City(BaseMixin, Base):
     postcode = Column(String, nullable=True, unique=False)
     subcountry_id = Column(Integer, ForeignKey('subcountries.id'))
     subcountry = relationship('SubCountry', back_populates="cities")
-    restaurants = relationship('Restaurant', backref="city", uselist=True, cascade="all, delete", lazy='dynamic')
+    restaurants = relationship('Restaurant', back_populates="city", cascade="all, delete", lazy='dynamic')

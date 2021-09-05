@@ -4,6 +4,8 @@ from routers.media.models import Image
 from mixins import BaseMixin
 from database import Base
 
+from sqlalchemy.ext.hybrid import hybrid_property
+
 class Meal(BaseMixin, Base):
     '''Meal Model'''
     __tablename__ = "meals"
@@ -13,9 +15,13 @@ class Meal(BaseMixin, Base):
     metatitle = Column(String, nullable=True)
     description = Column(String, nullable=False)
     restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
+    restaurant = relationship('Restaurant', back_populates="meals")
     images = relationship('Image', uselist=True, cascade="all, delete")
-    # ratings = relationship('MealRating', backref="meal", uselist=True, cascade="all, delete")
-    # currency = relationship[m:1]->custom join
+    # ratings
+
+    @hybrid_property
+    def currency(self):
+        return self.restaurant.city.subcountry.country.currency.title
 
 # class MealRating(RatingMixin, Base):
 #     '''Meal Rating Model'''

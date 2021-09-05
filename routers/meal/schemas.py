@@ -1,5 +1,6 @@
+from routers.currency.schemas import Currency
+from typing import Optional, List, Union
 from routers.media.schemas import Image
-from typing import Optional, List
 from pydantic import BaseModel
 from utils import as_form
 import datetime
@@ -27,6 +28,7 @@ class Meal(MealBase):
     images: List[Image]
     created: datetime.datetime
     updated: datetime.datetime
+    currency: Union[Currency, None]
 
     class Config:
         orm_mode = True

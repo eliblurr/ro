@@ -5,9 +5,11 @@ from pydantic import BaseModel
 import datetime, enum
 import routers.order.models as  m
 
+from enum import Enum
+
 from routers.voucher.schemas import Voucher
 
-class OrderState(str, enum.Enum):
+class OrderState(str, Enum):
     active = 'active'
     completed = 'completed'
     cancelled = 'cancelled'
@@ -39,7 +41,8 @@ class OrderMeal(BaseModel):
         orm_mode = True
 
 class OrderBase(BaseModel):
-    status: Optional[OrderState]
+    pass
+    # status: Optional[OrderState]
 
 class CreateOrder(OrderBase):
     table_id: int
@@ -60,11 +63,11 @@ class UpdateOrder(BaseModel):
 class Order(OrderBase):
     id: int
     total: float
-    total_to_pay: float
-    created: datetime.datetime
-    updated: datetime.datetime
-    voucher: Optional[Voucher]
-    meals: Optional[List[OrderMeal]]
+    served_total: Union[float, None]
+    # created: datetime.datetime
+    # updated: datetime.datetime
+    # voucher: Optional[Voucher]
+    # meals: Optional[List[OrderMeal]]
 
     class Config:
         orm_mode = True
