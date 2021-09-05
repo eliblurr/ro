@@ -7,7 +7,7 @@ from sqlalchemy.sql import text
 import re, datetime, shutil, os
 from config import MEDIA_ROOT
 from functools import wraps
-from utils import gen_code
+from utils import gen_code, http_exception_detail, schema_to_model
 from fastapi import Query, Depends
 from typing import List
 from PIL import Image
@@ -18,7 +18,7 @@ class CRUD:
         self.model=model
 
     async def create(self, payload, db:Session, images=None):
-        obj = self.model(**payload.dict())
+        obj = self.model(**schema_to_model(payload))
         if images:
             obj.images.extend([
                 IM(
@@ -64,7 +64,7 @@ class CRUD:
         return {'bk_size':base.count(), 'pg_size':data.__len__(), 'data':data}
             
     async def update(self, id, payload, db:Session, images=None):
-        rows = db.query(self.model).filter(self.model.id==id).update(payload.dict(exclude_unset=True), synchronize_session="fetch")
+        rows = db.query(self.model).filter(self.model.id==id).update(schema_to_model(payload, True), synchronize_session="fetch")
         db.commit()
         return await self.read_by_id(id, db)
 
