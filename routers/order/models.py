@@ -72,4 +72,3 @@ class Order(BaseMixin, Base):
     # discount
     # trigger if paid change status to completed
     # make payments to close session
-
