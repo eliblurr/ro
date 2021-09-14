@@ -13,6 +13,7 @@ from routers.media.main import router as media
 from routers.order.main import router as order
 from routers.policy.main import router as policy
 from routers.rating.main import router as rating
+from routers.users.auth.main import router as auth
 from routers.voucher.main import router as voucher
 from routers.users.role.main import router as role
 from routers.location.main import router as location
@@ -21,6 +22,7 @@ from routers.category.main import router as category
 from routers.restaurant.main import router as restaurant
 from routers.users.accounts.main import router as accounts
 
+app.include_router(auth, tags=['Authenticate'])
 app.include_router(accounts, tags=['Accounts'])
 app.include_router(location, tags=['Locations'])
 app.include_router(ad, tags=['Adverts'], prefix='/ads')

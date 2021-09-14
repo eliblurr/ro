@@ -14,6 +14,8 @@ class User(BaseMixin, Base):
     password = Column(String, nullable=False)
     roles = relationship('Role', back_populates="users")
     role_id = Column(Integer, ForeignKey('roles.id'))
+    restaurant = relationship('Restaurant', back_populates="users")
+    restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
     permission = 0
     
 class Admin(BaseMixin, Base):

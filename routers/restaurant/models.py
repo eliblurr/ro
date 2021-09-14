@@ -1,5 +1,6 @@
 from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.orm import relationship, validates
+from routers.users.accounts.models import User
 from routers.voucher.models import Voucher
 from routers.table.models import Table
 from routers.media.models import Image
@@ -13,7 +14,6 @@ class Restaurant(BaseMixin, Base):
     '''Restaurant Model'''
     __tablename__ = "restaurants"
 
-    # users -> bidirectional
     title = Column(String, nullable=False)
     metatitle = Column(String, nullable=True)
     description = Column(String, nullable=False)
@@ -28,6 +28,7 @@ class Restaurant(BaseMixin, Base):
     images = relationship('Image', uselist=True, cascade="all, delete")
     vouchers = relationship('Voucher', uselist=True, cascade="all, delete")
     meals = relationship('Meal', back_populates="restaurant", cascade="all, delete")
+    users = relationship('Users', back_populates="restaurant", cascade="all, delete")
     orders = relationship('Order', back_populates="restaurant", cascade="all, delete")
     tables = relationship('Table', uselist=True, backref='restaurant', cascade="all, delete")
     menus = relationship('Menu', secondary='restaurant_menus', backref='restaurant', lazy='dynamic')
