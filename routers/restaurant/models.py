@@ -13,12 +13,14 @@ class Restaurant(BaseMixin, Base):
     '''Restaurant Model'''
     __tablename__ = "restaurants"
 
+    # users -> bidirectional
     title = Column(String, nullable=False)
     metatitle = Column(String, nullable=True)
     description = Column(String, nullable=False)
     postal_address = Column(String, nullable=True)
     street_address = Column(String, nullable=True)
     digital_address = Column(String, nullable=True)
+    key = Column(String, unique=True, nullable=False)
     city_id = Column(Integer, ForeignKey('cities.id'))
     email = Column(String, unique=True, nullable=True)
     phone = Column(String, unique=True, nullable=True)

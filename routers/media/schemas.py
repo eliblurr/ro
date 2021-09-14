@@ -15,6 +15,9 @@ class ImageBase(BaseModel):
     listquad: Optional[str]
     thumbnail: Optional[str]
 
+    class Config:
+        orm_mode = True
+
 @as_form
 class CreateImage(BaseModel):
     meal_id: Optional[int]
@@ -26,6 +29,3 @@ class Image(ImageBase):
     id: int
     created: datetime.datetime
     updated: datetime.datetime
-
-    class Config:
-        orm_mode = True

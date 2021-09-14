@@ -22,6 +22,10 @@ SMALL = (400,400)
 LISTQUAD = (250,250)
 THUMBNAIL = (128, 128)
 
+ORIGINS = ["*"]
+HEADERS = ["*"]
+METHODS = ["*"]
+
 class Settings(BaseSettings):
     DATABASE_URL: str
 

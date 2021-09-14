@@ -4,6 +4,7 @@ from fastapi.openapi.utils import get_openapi
 from main import app
 import config as cfg
 
+
 from routers.ad.main import router as ad
 from routers.faq.main import router as faq
 from routers.meal.main import router as meal
@@ -11,18 +12,24 @@ from routers.table.main import router as table
 from routers.media.main import router as media
 from routers.order.main import router as order
 from routers.policy.main import router as policy
+from routers.rating.main import router as rating
 from routers.voucher.main import router as voucher
+from routers.users.role.main import router as role
 from routers.location.main import router as location
 from routers.currency.main import router as currency
 from routers.category.main import router as category
 from routers.restaurant.main import router as restaurant
+from routers.users.accounts.main import router as accounts
 
+app.include_router(accounts, tags=['Accounts'])
 app.include_router(location, tags=['Locations'])
 app.include_router(ad, tags=['Adverts'], prefix='/ads')
+app.include_router(role, tags=['Roles'], prefix='/roles')
 app.include_router(meal, tags=['Meals'], prefix='/meals')
 app.include_router(order, tags=['Orders'], prefix='/orders')
 app.include_router(table, tags=['Tables'], prefix='/tables')
 app.include_router(media, tags=['Media'], prefix='/uploads')
+app.include_router(rating, tags=['Ratings'], prefix='/ratings')
 app.include_router(policy, tags=['Policies'], prefix='/policies')
 app.include_router(voucher, tags=['Vouchers'], prefix='/vouchers')
 app.include_router(currency, tags=['Currencies'], prefix='/currencies')

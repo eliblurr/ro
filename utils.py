@@ -72,3 +72,10 @@ def http_exception_detail(loc=None, msg=None, type=None):
     if msg:
         detail.update({"type":type})
     return [detail]
+
+def type_2_pow(n):
+    assert ceil(log2(n)) == floor(log2(n)), f'{n} is not a power 2'
+    return n
+
+def list_sum(ls):
+    return sum(ls)

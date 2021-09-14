@@ -1,16 +1,20 @@
-from routers.currency.schemas import Currency
+from routers.currency.schemas import CurrencyBase
+from routers.rating.schemas import RatingBase
+from routers.media.schemas import ImageBase
 from typing import Optional, List, Union
-from routers.media.schemas import Image
-from pydantic import BaseModel
+from pydantic import BaseModel, confloat
 from utils import as_form
 import datetime
 
 class MealBase(BaseModel):
     title: str
-    cost: float
     description: str
+    cost: confloat(gt=0)
     status: Optional[bool]
     metatitle: Optional[str]
+
+    class Config:
+        orm_mode = True
 
 @as_form
 class CreateMeal(MealBase):
@@ -25,13 +29,11 @@ class UpdateMeal(BaseModel):
 
 class Meal(MealBase):
     id: int
-    images: List[Image]
     created: datetime.datetime
     updated: datetime.datetime
-    currency: Union[Currency, None]
-
-    class Config:
-        orm_mode = True
+    currency: Union[CurrencyBase, None]
+    images: List[Union[ImageBase, None]]
+    ratings: List[Union[RatingBase, None]]
 
 class MealList(BaseModel):
     bk_size: int
