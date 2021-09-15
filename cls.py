@@ -36,6 +36,8 @@ class CRUD:
     async def read_by_id(self, id, db:Session):
         return db.query(self.model).filter(self.model.id==id).first()
 
+    # to lower -> remove case sensitivity
+    # see None
     async def read(self, params, db:Session):
         base = db.query(self.model)
         dt_cols = [col[0] for col in self.model.c() if col[1]==datetime.datetime]
