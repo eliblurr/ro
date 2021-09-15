@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, DateTime, Boolean, String, ForeignKey, Float
 from sqlalchemy.ext.declarative import declared_attr
-from utils import to_tsvector_ix
+from utils import to_tsvector_ix, gen_code
 import datetime
 
 class BaseMethodMixin(object):
@@ -19,6 +19,9 @@ class ImageMixin(BaseMixin):
     detail = Column(String, nullable=True)
     listquad = Column(String, nullable=True)
     thumbnail = Column(String, nullable=True)
+
+class GenCodeMixin(object):
+    code = Column(String, unique=False, default=gen_code)
 
 class FullTextSearchMixin(object):
     # full text search here

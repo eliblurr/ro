@@ -28,7 +28,7 @@ class Restaurant(BaseMixin, Base):
     images = relationship('Image', uselist=True, cascade="all, delete")
     vouchers = relationship('Voucher', uselist=True, cascade="all, delete")
     meals = relationship('Meal', back_populates="restaurant", cascade="all, delete")
-    users = relationship('Users', back_populates="restaurant", cascade="all, delete")
+    users = relationship('User', back_populates="restaurant", cascade="all, delete")
     orders = relationship('Order', back_populates="restaurant", cascade="all, delete")
     tables = relationship('Table', uselist=True, backref='restaurant', cascade="all, delete")
     menus = relationship('Menu', secondary='restaurant_menus', backref='restaurant', lazy='dynamic')

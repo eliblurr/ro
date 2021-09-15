@@ -1,6 +1,9 @@
+from config import JWT_ALGORITHM, settings
+from datetime import timedelta, datetime
+from typing import Optional
+import inspect, secrets, os
 from fastapi import Form
 import sqlalchemy as sa
-import inspect, secrets, os
 from io import BytesIO
 from PIL import Image
 
@@ -79,3 +82,8 @@ def type_2_pow(n):
 
 def list_sum(ls):
     return sum(ls)
+
+def create_jwt(data:dict, expires_delta:Optional[timedelta]=None):
+    expire = datetime.utcnow() + expires_delta if expires_delta else datetime.utcnow() + timedelta(minutes=settings.ACCESS_SESSION_DURATION_IN_MINUTES)
+    data.update({"exp": expire})
+    return jwt.encode(data, settings.SECRET_KEY, algorithm=JWT_ALGORITHM)

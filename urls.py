@@ -23,7 +23,6 @@ from routers.restaurant.main import router as restaurant
 from routers.users.accounts.main import router as accounts
 
 app.include_router(auth, tags=['Authenticate'])
-app.include_router(accounts, tags=['Accounts'])
 app.include_router(location, tags=['Locations'])
 app.include_router(ad, tags=['Adverts'], prefix='/ads')
 app.include_router(role, tags=['Roles'], prefix='/roles')
@@ -34,6 +33,7 @@ app.include_router(media, tags=['Media'], prefix='/uploads')
 app.include_router(rating, tags=['Ratings'], prefix='/ratings')
 app.include_router(policy, tags=['Policies'], prefix='/policies')
 app.include_router(voucher, tags=['Vouchers'], prefix='/vouchers')
+app.include_router(accounts, tags=['Accounts'], prefix='/accounts')
 app.include_router(currency, tags=['Currencies'], prefix='/currencies')
 app.include_router(category, tags=['Categories'], prefix='/categories')
 app.include_router(restaurant, tags=['Restaurant'], prefix='/restaurants')

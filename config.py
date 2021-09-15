@@ -26,8 +26,12 @@ ORIGINS = ["*"]
 HEADERS = ["*"]
 METHODS = ["*"]
 
+JWT_ALGORITHM = "HS256"
+
 class Settings(BaseSettings):
     DATABASE_URL: str
+    ACCESS_SESSION_DURATION_IN_MINUTES: int = 30
+    SECRET: str = "eUCcDNVG$rVB6wUK2TjJRWptEN56b3_wQwxRdSq&R76wE6#m8+-A3sm4sKtLdH3hkug@T&@Szg__KjgjhnhyDHFnt%Ru#y8SxW*m=_7f$2uF9CArFq7LtmQqBNuQdTa@KLt@*Y%M24Ry=eUd%R6QsXW3=Z-g!!Rvu#srJ5*#PhbVq@6pyx=R2Jr7VhsYT_QT^j7uLqkqX2%RPnr9SS5RCbt6d!wY&+FQC6=&f37U&f+8JdXf!QV%pB?7V?QSwvrj"
 
     class Config:
         env_file = ".env"

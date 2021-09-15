@@ -6,13 +6,6 @@ from pydantic import BaseModel
 from utils import as_form
 import datetime
 
-# title = Column(String, nullable=False)
-# metatitle = Column(String, nullable=True)
-# description = Column(String, nullable=False)
-# meals = relationship('Meal', uselist=True, cascade="all, delete")
-# images = relationship('Image', uselist=True, cascade="all, delete")
-# menus = relationship('Menu', secondary='restaurant_menus', backref=backref('restaurant'), lazy='dynamic')
-
 class RestaurantBase(BaseModel):
     title: str
     description: str
