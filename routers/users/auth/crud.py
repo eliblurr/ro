@@ -1,41 +1,50 @@
+from utils import http_exception_detail
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from . import models, schemas
 from cls import CRUD
 
-revoked_tokens = CRUD(models.RevokedToken)
-password_reset_codes = CRUD(models.PasswordResetCode)
-sms_verication_codes = CRUD(models.SMSVerificationCode)
-
 async def verify_customer(payload:schemas.CustomerLogin, db:Session):
-    # user = db.query().filter().first()
-    # if not user:
-    #     raise HTTPException(status_code=404)
+    # if sms_verication_codes.read(params, db):
+    # get customer
+    # return customer
+    # else 401
     return
-    # users.read(params, db)
-    # user = db.query(User).filter(User.email==payload.email).first()
-    # if not user:
-    #     raise HTTPException(status_code=404)
-    # if user.verify_hash(payload.password, user.password):
-    # 404 -> 401  
     
 async def verify_admin(payload:schemas.AdminLogin, db:Session):
-    pass
+    admin = db.query(models.Admin()).filter_by(code=payload.email).first()
+    if not admin:
+        raise HTTPException(status_code=404, detail=http_exception_detail(loc="email", msg="admin not found", type="Not Found"))
+    if admin.verify_hash(payload.password, admin.password):
+        return admin
+    else:
+        raise HTTPException(status_code=401, detail=http_exception_detail(loc="password or email", msg="wrong credentials", type="Unauthorized"))
     
 async def verify_user(payload:schemas.UserLogin, db:Session):
-    pass
+    user = db.query(models.User).filter_by(code=payload.code).first()
+    if not user:
+        raise HTTPException(status_code=404, detail=http_exception_detail(loc="code", msg="user not found", type="Not Found"))
+    if user.verify_hash(payload.password, user.password):
+        return user
+    else:
+        raise HTTPException(status_code=401, detail=http_exception_detail(loc="password or code", msg="wrong credentials", type="Unauthorized"))
 
 async def revoke_token(payload:schemas.Logout, db:Session):
-    pass
+    db.add_all([RevokedToken(jti=token) for token in payload.dict().values()])
+    db.commit()
+    return 'success'
 
 async def refresh_token(payload:schemas.RefreshToken, db:Session):
-    pass
+    # revoke old tokens
+    # get new token
+    return
 
-async def is_token_blacklisted():
-    pass
+async def is_token_blacklisted(token:str, db:Session):
+    return db.query(models.RevokedToken.id).filter_by(jti=token).first() is not None
 
-async def get_current_user():
-    pass
+async def get_current_user(token:str, db:Session):
+    # decrypt token
+    return
 
 
 

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, ForeignKey, CheckConstraint, event
+from sqlalchemy import Column, String, Integer, ForeignKey, CheckConstraint, event
 from sqlalchemy.orm import relationship
 from mixins import BaseMixin
 from database import Base
@@ -32,7 +32,7 @@ class Image(BaseMixin, Base):
     category_id = Column(Integer, ForeignKey('categories.id'))
     restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
     
-# after delete to remove from file system
-# @event.listens_for(Image.__table__, 'before_delete')
-# def remove_file(mapper, connection, target):
-#     pass
+# Remove from File System after_delete
+@event.listens_for(Image, 'after_delete')
+def remove_file(mapper, connection, target):
+    pass

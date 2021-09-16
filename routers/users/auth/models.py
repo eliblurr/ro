@@ -1,18 +1,19 @@
 from sqlalchemy import Column, String, Integer, event
-from models import GenCodeMixin
+from mixins import GenCodeMixin, BaseMixin
+from ..accounts.models import *
 from database import Base
 
 class PasswordResetCode(GenCodeMixin, Base):
     __tablename__ = 'password_reset_codes'
 
-    user_id = Column(Integer, unique=True)
+    user_id = Column(Integer, unique=True, primary_key=True)
 
 class SMSVerificationCode(GenCodeMixin, Base):
     __tablename__ = 'sms_verication_codes'
 
-    customer_id = Column(Integer, unique=True)
+    customer_id = Column(Integer, unique=True, primary_key=True)
 
-class RevokedToken(Base):
+class RevokedToken(BaseMixin, Base):
     __tablename__ = 'revoked_tokens'
 
     jti = Column(String)
