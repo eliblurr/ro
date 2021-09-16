@@ -14,6 +14,7 @@ class AdminLogin(BaseModel):
 
 class CustomerLogin(BaseModel):
     phone: constr(regex=PHONE)
+    code: str 
 
 class LoginResponse(BaseModel):
     access_token: str

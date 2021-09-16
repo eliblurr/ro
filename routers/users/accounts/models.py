@@ -1,12 +1,12 @@
 from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.orm import relationship, validates
 from sqlalchemy.ext.hybrid import hybrid_property
+from mixins import BaseMixin, HashMethodMixin
 from routers.users.role.models import Role
 from constants import PHONE, EMAIL
-from mixins import BaseMixin
 from database import Base
 
-class User(BaseMixin, Base):
+class User(BaseMixin, HashMethodMixin, Base):
     '''User Model'''
     __tablename__ = "users"
 
@@ -18,7 +18,7 @@ class User(BaseMixin, Base):
     restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
     permission = 0
     
-class Admin(BaseMixin, Base):
+class Admin(BaseMixin, HashMethodMixin, Base):
     '''Admin Model'''
     __tablename__ = "admins"
 

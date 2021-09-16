@@ -1,9 +1,9 @@
 from sqlalchemy import Column, Integer, ForeignKey, CheckConstraint, event
 from sqlalchemy.orm import relationship
-from mixins import ImageMixin
+from mixins import BaseMixin
 from database import Base
 
-class Image(ImageMixin, Base):
+class Image(BaseMixin, Base):
     '''Image Model'''
     __tablename__ = "images"
     __table_args__ = (
@@ -20,6 +20,11 @@ class Image(ImageMixin, Base):
             """
         , name="ck_img_assoc_single_fk_allowed"),
     )
+
+    small = Column(String, nullable=True)
+    detail = Column(String, nullable=True)
+    listquad = Column(String, nullable=True)
+    thumbnail = Column(String, nullable=True)
 
     ad_id = Column(Integer, ForeignKey('ads.id'))
     meal_id = Column(Integer, ForeignKey('meals.id'))
