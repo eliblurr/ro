@@ -46,7 +46,7 @@ async def verify_phone_add_sms_verification(phone:schemas.constr(regex=schemas.P
     db.add(obj)
     db.commit()
     db.refresh(obj)
-    return {"code":obj.code}
+    return obj.code
 
 async def get_current_user(id:str, user_type:str, db:Session):
     model = models.User if user_type == "users" else models.Admin if user_type == "admin" else models.Customer
