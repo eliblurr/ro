@@ -87,3 +87,6 @@ def create_jwt(data:dict, expires_delta:Optional[timedelta]=None):
     expire = datetime.utcnow() + expires_delta if expires_delta else datetime.utcnow() + timedelta(minutes=settings.ACCESS_SESSION_DURATION_IN_MINUTES)
     data.update({"exp": expire})
     return jwt.encode(data, settings.SECRET_KEY, algorithm=JWT_ALGORITHM)
+
+def decode_jwt(jwt:str):
+    return jwt.decode(data, settings.SECRET_KEY, settings.ALGORITHM)

@@ -9,6 +9,7 @@ from routers.meal.models import Meal
 from constants import PHONE, EMAIL
 from mixins import BaseMixin
 from database import Base
+import re
 
 class Restaurant(BaseMixin, Base):
     '''Restaurant Model'''

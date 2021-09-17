@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends
-from cls import ContentQueryChecker
-from sqlalchemy.orm import Session
-from dependencies import get_db
+# from fastapi import APIRouter, Depends
+# from cls import ContentQueryChecker
+# from sqlalchemy.orm import Session
+# from dependencies import get_db
 # from . import crud, schemas
 
-router = APIRouter()
+# router = APIRouter()
 
 # @router.post('/', description='', response_model=schemas.FAQ, status_code=201, name='FAQ')
 # async def create(payload:schemas.CreateFAQ, db:Session=Depends(get_db)):

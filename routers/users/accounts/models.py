@@ -5,6 +5,7 @@ from mixins import BaseMixin, HashMethodMixin
 from routers.users.role.models import Role
 from constants import PHONE, EMAIL
 from database import Base
+import re
 
 class User(BaseMixin, HashMethodMixin, Base):
     '''User Model'''

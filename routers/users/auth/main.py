@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from utils import http_exception_detail, create_jwt
+from dependencies import get_db, validate_bearer
 from sqlalchemy.orm import Session
-from dependencies import get_db
+from services.sms import send_sms
 from datetime import timedelta
 from config import settings
 from . import schemas, crud
@@ -38,20 +39,29 @@ async def logout(payload:schemas.Logout, db:Session=Depends(get_db)):
 
 @router.post("/token/refresh", description='', response_model=schemas.Token, name='Refresh Token')
 async def refresh_token(payload:schemas.RefreshToken, db:Session=Depends(get_db)):
-    pass
+    if await crud.is_token_blacklisted(payload.refresh_token, db):
+        raise HTTPException(status_code=401, detail=http_exception_detail(loc="refresh_token", msg="token blacklisted", type="BlacklistedToken"))
+    if await revoke_token(payload, db):
+        data = decode_jwt(data=payload.refresh_token)
+        return {
+            "access_token":create_jwt(data=data),
+            "refresh_token":create_jwt(data=data, timedelta=timedelta(minutes=settings.REFRESH_SESSION_DURATION_IN_MINUTES)),
+        }
+    raise HTTPException(status_code=400)
 
 @router.post("/current-user", response_model=Union[schemas.Customer, schemas.Admin, schemas.User], name='Current User')
-async def get_current_user(payload:schemas.AccessToken, db:Session=Depends(get_db)):
-    pass
+async def get_current_user(payload:dict=Depends(validate_bearer), db:Session=Depends(get_db)):
+    case = ( payload.get("user", {}).get("id"), payload.get("userType") )
+    if not all(case):
+        raise HTTPException(status_code=400, detail=http_exception_detail(loc="Bearer Token", msg="unrecognizable bearer format", type="AlienBearer"))
+    return await crud.get_current_user(case[0], case[1], db)
 
 @router.get("/password-reset-code", name='Password Reset Code')
-async def request_password_reset_code(user_id:int, db:Session=Depends(get_db)):
+async def request_password_reset_code(email:schemas.constr(regex=schemas.EMAIL), db:Session=Depends(get_db)):
     pass
 
-@router.get("/sms-verification-code", name='SMS Verification Code')
-async def request_sms_verification_code(customer_id:int, db:Session=Depends(get_db)):
-    # get customer
-    # if customer store in db else 404
-    # sendsms from services
-    # return 200, success
-    pass
+@router.get("/sms-verification-code", description='', name='SMS Verification Code')
+async def request_sms_verification_code(phone:schemas.constr(regex=schemas.PHONE), db:Session=Depends(get_db)):
+    if await send_sms():
+        return await verify_phone_add_sms_verification(phone, db)
+    return 'Failed'

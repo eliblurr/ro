@@ -1,18 +1,19 @@
-from utils import http_exception_detail
+from utils import http_exception_detail, decode_jwt
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from . import models, schemas
 from cls import CRUD
 
 async def verify_customer(payload:schemas.CustomerLogin, db:Session):
-    # if sms_verication_codes.read(params, db):
-    # get customer
-    # return customer
-    # else 401
-    return
+    customer = db.query(models.Customer).filter_by(phone=payload.phone).first()
+    if not customer:
+        raise HTTPException(status_code=404, detail=http_exception_detail(loc="phone", msg="customer not found", type="Not Found"))
+    if not db.query(models.SMSVerificationCode).filter_by(phone=customer.phone, code=payload.code).first():
+        raise HTTPException(status_code=401, detail=http_exception_detail(loc="code or phone", msg="wrong credentials", type="Unauthorized"))
+    return customer
     
 async def verify_admin(payload:schemas.AdminLogin, db:Session):
-    admin = db.query(models.Admin()).filter_by(code=payload.email).first()
+    admin = db.query(models.Admin).filter_by(code=payload.email).first()
     if not admin:
         raise HTTPException(status_code=404, detail=http_exception_detail(loc="email", msg="admin not found", type="Not Found"))
     if admin.verify_hash(payload.password, admin.password):
@@ -34,26 +35,34 @@ async def revoke_token(payload:schemas.Logout, db:Session):
     db.commit()
     return 'success'
 
-async def refresh_token(payload:schemas.RefreshToken, db:Session):
-    # revoke old tokens
-    # get new token
-    return
-
 async def is_token_blacklisted(token:str, db:Session):
     return db.query(models.RevokedToken.id).filter_by(jti=token).first() is not None
 
-async def get_current_user(token:str, db:Session):
-    # decrypt token
-    return
+async def verify_phone_add_sms_verification(phone:schemas.constr(regex=schemas.PHONE), db:Session):
+    customer = db.query(models.Customer).filter_by(phone=payload.phone).first()
+    if not customer:
+        raise HTTPException(status_code=404, detail=http_exception_detail(loc="phone", msg="customer not found", type="Not Found"))
+    obj = models.SMSVerificationCode(phone=customer.phone)
+    db.add(obj)
+    db.commit()
+    db.refresh(obj)
+    return {"code":obj.code}
 
+async def get_current_user(id:str, user_type:str, db:Session):
+    model = models.User if user_type == "users" else models.Admin if user_type == "admin" else models.Customer
+    return db.query(model).get(id)
 
-
-
-
-
-
-
-
+# async def refresh_token(payload:schemas.RefreshToken, db:Session):
+#     if await is_token_blacklisted(payload.refresh_token, db):
+#         raise HTTPException(status_code=401, detail=http_exception_detail(loc="refresh_toker", msg="token blacklisted", type="BlacklistedToken"))
+#     if await revoke_token(payload, db):
+#         data = decode_jwt(data=payload.refresh_token)
+#         user = await read_user_by_id(data.get('id', 0), db)
+#         return {
+#             "access_token": utils.create_token(data = {'email':user.email,'id':user.id, 'permissions':user.custom_perm+user.role.permissions}, expires_delta=datetime.timedelta(minutes=settings.TOKEN_DURATION_IN_MINUTES)), 
+#             "refresh_token": utils.create_token(data = {'id':user.id}, expires_delta=datetime.timedelta(minutes=settings.R_TOKEN_DURATION_IN_MINUTES)), 
+#         }
+#     raise HTTPException(status_code=400)
 
 # from ..accounts.crud import users, admins, customers
 # User

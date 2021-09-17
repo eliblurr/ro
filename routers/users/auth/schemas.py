@@ -1,8 +1,8 @@
 from pydantic import BaseModel, constr
 from typing import Optional, Union
+from constants import PHONE, EMAIL
 from ..accounts.schemas import *
 from ..role.schemas import *
-from constants import PHONE, EMAIL
 
 class UserLogin(BaseModel):
     code: str

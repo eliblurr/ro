@@ -1,4 +1,9 @@
+from jwt.exceptions import ExpiredSignatureError, DecodeError
+from routers.users.auth.crud import is_token_blacklisted
+from utils import decode_jwt, http_exception_detail
+from fastapi import HTTPException, Depends
 from database import SessionLocal
+from main import oauth2_scheme
 
 def get_db():
     db = SessionLocal()
@@ -7,22 +12,14 @@ def get_db():
     finally:
         db.close()
 
-# from routers.auth_router.crud import is_token_blacklisted
-# from fastapi import Header, HTTPException, Depends
-# from database import SessionLocal
-# from utils import decode_token
-# from main import oauth2_scheme
-# import jwt, sys
-
-# async def validate_bearer(token:str=Depends(oauth2_scheme), db=Depends(get_db)):
-#     pass
-#     try:
-#         if await is_token_blacklisted(token, db):
-#             return False
-#         return decode_token(token)
-#     except jwt.exceptions.ExpiredSignatureError:
-#         raise HTTPException(status_code=401, detail='token expired', headers={"WWW-Authenticate": "Bearer"})
-#     except jwt.exceptions.DecodeError:
-#         raise HTTPException(status_code=401, detail='decode failed', headers={"WWW-Authenticate": "Bearer"})
-#     except:
-#         raise HTTPException(status_code=401, detail='decode failed', headers={"WWW-Authenticate": "Bearer"})
+async def validate_bearer(token:str=Depends(oauth2_scheme), db=Depends(get_db)):
+    try:
+        if await is_token_blacklisted(token, db):
+            raise HTTPException(status_code=401, detail=http_exception_detail(loc="Bearer <token>", msg="token blacklisted", type="BlacklistedToken"), headers={"WWW-Authenticate": "Bearer"})
+        return decode_jwt(token)
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail=http_exception_detail(loc="Bearer <token>", msg="token expired", type="ExpiredSignatureError"), headers={"WWW-Authenticate": "Bearer"})
+    except DecodeError:
+        raise HTTPException(status_code=500, detail=http_exception_detail(loc="Bearer <token>", msg="token decode failed", type="DecodeError"), headers={"WWW-Authenticate": "Bearer"})
+    except:
+        raise HTTPException(status_code=500, detail=http_exception_detail(loc="Bearer <token>", msg="something went wrong", type="_"), headers={"WWW-Authenticate": "Bearer"})

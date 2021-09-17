@@ -38,6 +38,7 @@ class CRUD:
 
     # to lower -> remove case sensitivity
     # see None
+    # FTS
     async def read(self, params, db:Session):
         base = db.query(self.model)
         dt_cols = [col[0] for col in self.model.c() if col[1]==datetime.datetime]
