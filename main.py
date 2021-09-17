@@ -41,7 +41,3 @@ from routers.meal.models import Base
 from routers.users.accounts.models import Base
 from database import engine
 Base.metadata.create_all(bind=engine)
-
-from services.email import email
-
-email(bg=True)

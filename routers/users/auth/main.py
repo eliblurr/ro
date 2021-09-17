@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from utils import http_exception_detail, create_jwt
 from dependencies import get_db, validate_bearer
+from services.email import bg_email, Mail
 from sqlalchemy.orm import Session
 from services.sms import send_sms
 from schedulers import scheduler
@@ -57,21 +58,29 @@ async def get_current_user(payload:dict=Depends(validate_bearer), db:Session=Dep
         raise HTTPException(status_code=400, detail=http_exception_detail(loc="Bearer Token", msg="unrecognizable bearer format", type="AlienBearer"))
     return await crud.get_current_user(case[0], case[1], db)
 
-@router.get("/password-reset-code", name='Password Reset Code')
-async def request_password_reset_code(payload:schemas.UserCode, db:Session=Depends(get_db)):
-    pass
-    # scheduler.add_job(delete_password_reset_code, trigger='date', kwargs={'id':new_code.id}, id=f'ID{new_code.id}', replace_existing=True, run_date=datetime.datetime.utcnow()+datetime.timedelta(minutes=settings.RPS_DURATION_IN_MINUTES))
-    # 1. check if user is admin else 403
-    # 2. get user restaurant email
-    # 3. send verification to code to restaurant email
-    # 4. store in table
-    # 5. return success
-    # 6. set expiration time with apscheduler
+@router.post("/password-reset-code", name='Password Reset Code')
+async def request_password_reset_code(background_tasks:BackgroundTasks, payload:schemas.UserCode, db:Session=Depends(get_db)):
+    await bg_email(
+        background_tasks, 
+        mail=Mail(
+            recipients=["a@A.com"], 
+            subject="sd", 
+            body="as"
+        )
+    )
+    return 'success'
 
 @router.get("/sms-verification-code", description='', name='SMS Verification Code')
 async def request_sms_verification_code(phone:schemas.constr(regex=schemas.PHONE), db:Session=Depends(get_db)):
-    # 6. set expiration time with apscheduler
     code = await crud.verify_phone_add_sms_verification(phone, db)
     if await send_sms(body=code):
         return 'success'
     return 'failed'
+
+# scheduler.add_job(delete_password_reset_code, trigger='date', kwargs={'id':new_code.id}, id=f'ID{new_code.id}', replace_existing=True, run_date=datetime.datetime.utcnow()+datetime.timedelta(minutes=settings.RPS_DURATION_IN_MINUTES))
+# 1. check if user is admin else 403
+# 2. get user restaurant email
+# 3. send verification to code to restaurant email
+# 4. store in table
+# 5. return success
+# 6. set expiration time with apscheduler [both]

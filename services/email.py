@@ -1,12 +1,8 @@
-from fastapi_mail import FastMail, MessageSchema,ConnectionConfig
+from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from pydantic import EmailStr, BaseModel
-from fastapi import BackgroundTasks
+from fastapi import UploadFile, File
 from typing import List, Optional
-# from main import background_tasks
 from config import settings
-from functools import wraps
-
-background_tasks = BackgroundTasks()
 
 fm = FastMail(
     ConnectionConfig(
@@ -23,56 +19,20 @@ fm = FastMail(
     )
 )
 
-class EmailSchema(BaseModel):
+class Mail(BaseModel):
+    subject: Optional[str] = settings.DEFAULT_MAIL_SUBJECT
     recipients: List[EmailStr]
-    subject: Optional[str]
     body: str
+    
+async def email(mail, *args, **kwargs):
+    message = MessageSchema(
+        subject=mail.subject,
+        recipients=mail.recipients, 
+        body=mail.body,
+        attachments=kwargs.get('attachments', []),
+        subtype="html"
+    )
+    await fm.send_message(message)
 
-def run_process_decorator(func):
-    @wraps(func)
-    def inner(*args, **kwargs):
-        if kwargs.get("bg", False)==True:
-            return background_tasks.add_task(func(*args, **kwargs))    
-        return func(*args, **kwargs)
-    return inner
-
-async def a():
-    print('s')
-
-import asyncio
-
-@run_process_decorator
-def email(*args, **kwargs):
-    # asyncio.run(a)
-    # payload:EmailSchema, 
-    print('ssdsd')
-
-# @app.post("/emailbackground")
-# async def send_in_background(background_tasks: BackgroundTasks,
-#     email: EmailSchema
-#     ):
-
-#     message = MessageSchema(
-#         subject="Fastapi mail module",
-#         recipients=email.dict().get("email"),
-#         body="Simple background task",
-#         )
-
-#     fm = FastMail(conf)
-
-#     background_tasks.add_task(fm.send_message,message)
-
-#     return JSONResponse(status_code=200, content={"message": "email has been sent"})
-
-
-# @celery.task(base=TaskManager, name='email', autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 5, 'countdown': 2}, task_time_limit=60) 
-# def send_async_email(*args, **kwargs):
-#     mail = Mail.parse_raw(kwargs.get('mail'))
-#     message = MessageSchema(
-#         subject=mail.content.get('subject','No subject'),
-#         recipients=mail.email, 
-#         body=kwargs.get('template').format(**mail.content),
-#         attachments=kwargs.get('files', []),
-#         subtype="html"
-#     )
-#     asyncio.run(fm.send_message(message))
+async def bg_email(background_tasks, mail, *args, **kwargs):
+    background_tasks.add_task(email, mail, *args, **kwargs)
