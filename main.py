@@ -3,6 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi.openapi.utils import get_openapi
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, Request
+from fastapi import BackgroundTasks
 from database import SessionLocal
 from schedulers import scheduler
 import config as cfg
@@ -40,3 +41,7 @@ from routers.meal.models import Base
 from routers.users.accounts.models import Base
 from database import engine
 Base.metadata.create_all(bind=engine)
+
+from services.email import email
+
+email(bg=True)
