@@ -4,6 +4,7 @@ from fastapi.openapi.utils import get_openapi
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, Request
 from database import SessionLocal
+from schedulers import scheduler
 import config as cfg
 
 app = FastAPI(
@@ -26,13 +27,11 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 @app.on_event('startup')
 async def startup_event():
-    # start schedular here
-    print('application is ready')
+    scheduler.start()
 
 @app.on_event('shutdown')
 async def shutdown_event():
-    # shutdown schedular here
-    print('see you later')
+    scheduler.shutdown()
 
 from urls import *
 from routers.restaurant.models import Base

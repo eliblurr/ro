@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     REFRESH_SESSION_DURATION_IN_MINUTES: int = 500
     TWILIO_AUTH_TOKEN: str = '7b6c506ee07337cc3d02536d5119c4b2'
     TWILIO_ACCOUNT_SID: str = 'AC959cbde01aced5669b0121ffea2df117'
+    BACKGROUND_SCHEDULER_MISFIRE_GRACE_TIME_IN_SECONDS: str = 15
     SECRET: str = "eUCcDNVG$rVB6wUK2TjJRWptEN56b3_wQwxRdSq&R76wE6#m8+-A3sm4sKtLdH3hkug@T&@Szg__KjgjhnhyDHFnt%Ru#y8SxW*m=_7f$2uF9CArFq7LtmQqBNuQdTa@KLt@*Y%M24Ry=eUd%R6QsXW3=Z-g!!Rvu#srJ5*#PhbVq@6pyx=R2Jr7VhsYT_QT^j7uLqkqX2%RPnr9SS5RCbt6d!wY&+FQC6=&f37U&f+8JdXf!QV%pB?7V?QSwvrj"
 
     class Config:

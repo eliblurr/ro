@@ -4,8 +4,10 @@ from constants import PHONE, EMAIL
 from ..accounts.schemas import *
 from ..role.schemas import *
 
-class UserLogin(BaseModel):
+class UserCode(BaseModel):
     code: str
+
+class UserLogin(UserCode):
     password: str
 
 class AdminLogin(BaseModel):

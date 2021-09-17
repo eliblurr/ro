@@ -52,6 +52,8 @@ async def get_current_user(id:str, user_type:str, db:Session):
     model = models.User if user_type == "users" else models.Admin if user_type == "admin" else models.Customer
     return db.query(model).get(id)
 
+def del_():
+    pass
 # async def refresh_token(payload:schemas.RefreshToken, db:Session):
 #     if await is_token_blacklisted(payload.refresh_token, db):
 #         raise HTTPException(status_code=401, detail=http_exception_detail(loc="refresh_toker", msg="token blacklisted", type="BlacklistedToken"))
