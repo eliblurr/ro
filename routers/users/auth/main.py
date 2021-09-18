@@ -79,7 +79,7 @@ async def request_password_reset_code(background_tasks:BackgroundTasks, payload:
     )
     return 'success'
 
-@router.get("/sms-verification-code", description='', name='SMS Verification Code')
+@router.post("/sms-verification-code", description='', name='SMS Verification Code')
 async def request_sms_verification_code(phone:schemas.constr(regex=schemas.PHONE), db:Session=Depends(get_db)):
     obj = await crud.verify_phone_add_sms_verification(phone, db)
     scheduler.add_job(
