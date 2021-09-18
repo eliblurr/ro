@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from utils import http_exception_detail, create_jwt
 from dependencies import get_db, validate_bearer
 from services.email import bg_email, Mail
+from datetime import timedelta, datetime
 from sqlalchemy.orm import Session
 from services.sms import send_sms
 from schedulers import scheduler
-from datetime import timedelta
 from config import settings
 from . import schemas, crud
 from typing import Union
@@ -60,27 +60,36 @@ async def get_current_user(payload:dict=Depends(validate_bearer), db:Session=Dep
 
 @router.post("/password-reset-code", name='Password Reset Code')
 async def request_password_reset_code(background_tasks:BackgroundTasks, payload:schemas.UserCode, db:Session=Depends(get_db)):
+    obj = await crud.verify_user_code_add_pass_reset_code(payload, db)
+    scheduler.add_job(
+        crud.del_code,
+        trigger='date',
+        kwargs={'_type':'passcode', 'pk':obj[0].user_id},
+        id=f'ID-{obj[0].user_id}',
+        replace_existing=True,
+        run_date=datetime.utcnow() + timedelta(minutes=settings.RESET_PASSWORD_CODE_VALID_DURATION_IN_MINUTES)
+    )
     await bg_email(
         background_tasks, 
         mail=Mail(
-            recipients=["a@A.com"], 
-            subject="sd", 
-            body="as"
+            recipients=[obj[1]], 
+            subject="Password Verification Code", 
+            body=f"Code is {obj[0].code}"
         )
     )
     return 'success'
 
 @router.get("/sms-verification-code", description='', name='SMS Verification Code')
 async def request_sms_verification_code(phone:schemas.constr(regex=schemas.PHONE), db:Session=Depends(get_db)):
-    code = await crud.verify_phone_add_sms_verification(phone, db)
-    if await send_sms(body=code):
+    obj = await crud.verify_phone_add_sms_verification(phone, db)
+    scheduler.add_job(
+        crud.del_code,
+        trigger='date',
+        kwargs={'_type':'sms', 'pk':obj.phone},
+        id=f'ID-{obj.phone}',
+        replace_existing=True,
+        run_date=datetime.utcnow() + timedelta(minutes=settings.SMS_CODE_VALID_DURATION_IN_MINUTES)
+    )
+    if await send_sms(body=obj.code):
         return 'success'
     return 'failed'
-
-# scheduler.add_job(delete_password_reset_code, trigger='date', kwargs={'id':new_code.id}, id=f'ID{new_code.id}', replace_existing=True, run_date=datetime.datetime.utcnow()+datetime.timedelta(minutes=settings.RPS_DURATION_IN_MINUTES))
-# 1. check if user is admin else 403
-# 2. get user restaurant email
-# 3. send verification to code to restaurant email
-# 4. store in table
-# 5. return success
-# 6. set expiration time with apscheduler [both]

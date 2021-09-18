@@ -86,6 +86,9 @@ class CRUD:
         return rows
 
     async def bk_delete(self, ids:list, db:Session):
+        # deleted_objects = User.__table__.delete().where(User.id.in_([1, 2, 3]))
+        # session.execute(deleted_objects)
+        # session.commit()
         rows = db.query(self.model).filter(self.model.id.in_(ids)).delete(synchronize_session=False)
         db.commit()
         return rows
