@@ -37,13 +37,30 @@ class CRUD:
         return db.query(self.model).filter(self.model.id==id).first()
 
     # to lower -> remove case sensitivity
-    # see None
+    # .filter(
+    #     func.lower(Example.string_col)
+    #     .contains(search_string.lower(), autoescape=True)
+    # )
+    # .query.filter(Model.column.ilike("ganye"))
+    # from sqlalchemy import func
+    # user = models.User.query.filter(func.lower(User.username) == func.lower("GaNyE")).first()
     # FTS
     async def read(self, params, db:Session):
+        # base = db.query(self.model)
+        # from sqlalchemy import func
+        # ext_filters = {x:params[x]if params[x]!='null' else None for x in params if x not in ["offset", "limit", "q", "sort", "action"] and params[x] is not None}
+        # # ext_filters = [f'{self.model.x}']
+        # # base = base.filter_by(**ext_filters)
+        # # f'{self.model.__table__.c[k].ilike(v if v is not None else None)}'
+        # a = [f'{self.model.__table__.c[k].ilike(v if v is not None else None)}' for k,v in ext_filters.items()]
+        # if a:
+        #     base = base.filter(and_(text(*a)))
+        # # print(base)
+        # return
         base = db.query(self.model)
         dt_cols = [col[0] for col in self.model.c() if col[1]==datetime.datetime]
         dte_filters = {x:params[x] for x in params if x in dt_cols and params[x] is not None}
-        ext_filters = {x:params[x] for x in params if x not in ["offset", "limit", "q", "sort", "action", *dt_cols] and params[x] is not None}
+        ext_filters = {x:params[x] if params[x]!='null' else None for x in params if x not in ["offset", "limit", "q", "sort", "action", *dt_cols] and params[x] is not None}
         dte_filters = [ f'{self.model.__table__.c[k]} {OPS.get(val.split(":", 1)[0], "==")} "{val.split(":", 1)[1]}"' if re.search(DT_Y, val) else f'{self.model.__table__.c[k]} == {val}' for k,v in dte_filters.items() for val in v]
 
         base = base.filter_by(**ext_filters)

@@ -52,9 +52,8 @@ async def verify_phone_add_sms_verification(phone:schemas.constr(regex=schemas.P
 async def verify_user_code_add_pass_reset_code(payload:schemas.UserCode, db:Session):
     # 1. check if user is admin else 403
     # 2. get user restaurant email
-    # 3. send verification to code to restaurant email
-    # 4. store in table
-    # 5. return obj as (code_obj, restaurant email)
+    # 3. store in table
+    # 4. return obj as (code_obj, restaurant email)
     return ("", "a@a.com")
 
 async def get_current_user(id:str, user_type:str, db:Session):
