@@ -8,9 +8,16 @@ from config import settings
     hence change to postgresql to accomodate
 '''
 
+db_url = 'postgresql:'+settings.DATABASE_URL.split(':', 1)[1]
 
+# postgresql://postgres:postgres@0.0.0.0:8888/ro4
+# postgresql://postgres:postgres@0.0.0.0:8888/ro4
+
+# print(settings.DATABASE_URL.split(':', 1))
+
+# postgres://postgres:postgres@0.0.0.0:8888/ro4
 # engine = create_engine(settings.DATABASE_URL)
-engine = create_engine('postgresql:'+settings.DATABASE_URL.split(':', 1)[1])
+engine = create_engine(db_url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 metadata = MetaData()
