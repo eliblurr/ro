@@ -1,1 +1,1 @@
-web:DEBUG=0 gunicorn main:app -w 12 -k uvicorn.workers.UvicornWorker --log-file -
+web: DEBUG=0 gunicorn -w 12 -k uvicorn.workers.UvicornWorker main:app --log-file -
