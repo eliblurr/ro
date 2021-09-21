@@ -1,7 +1,8 @@
-from sqlalchemy import Column, Integer, DateTime, Boolean, String, ForeignKey, Float
+from sqlalchemy import Column, Integer, DateTime, Boolean, String, ForeignKey, Float, Index, types
 from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.dialects.postgresql import TSVECTOR
 from passlib.hash import pbkdf2_sha256 as sha256
-from utils import to_tsvector_ix, gen_code
+from utils import to_tsvector, gen_code
 import datetime
 
 class BaseMethodMixin(object):
@@ -25,42 +26,30 @@ class HashMethodMixin(object):
 class GenCodeMixin(object):
     code = Column(String, unique=False, default=gen_code)
 
+class TSVector(types.TypeDecorator):
+    impl = TSVECTOR
+
 class FullTextSearchMixin(object):
-    # full text search here
+    @declared_attr
+    def __ts_vector__(cls):
+        return to_tsvector(*cls.__ftcols__)
+        # Column(TSVector(), Computed("to_tsvector('english', title || ' ' || description)", persisted=True))
 
-    pass 
-    # __ts_vector__ = to_tsvector_ix('english', *cols)
-    # __table_args__ = (
-    #     Index(
-    #         'ix_tsv',
-    #         to_tsvector_ix('english', 'title', 'symbol'),
-    #         postgresql_using='gin'
-    #         ),
-    #         Index(
-    #             'ix_full_text_search',
-    #             __ts_vector__,
-    #             postgresql_using='gin'
-    #         ),
-    #     )
+    @declared_attr
+    def __table_args__(cls):
+        return (
+            Index(
+                'ix_%s__ts_vector__' % cls.__tablename__, 
+                cls.__ts_vector__, 
+                postgresql_using='gin'
+            ),
+        )
 
-    # __ts_vector__ = to_tsvector_ix('english', 'title', 'symbol')
-    # __table_args__ = (
-    #     Index(
-    #         'ix_tsv',
-    #         to_tsvector_ix('english', 'title', 'symbol'),
-    #         postgresql_using='gin'
-    #         ),
-    #         Index(
-    #             'idx_person_fts',
-    #             __ts_vector__,
-    #             postgresql_using='gin'
-    #         ),
-    #     )
-
-    # option 1
     # @classmethod
-    # def fulltext_search(cls, session, search_string, field):
-    #     return session.query(cls).filter(func.to_tsvector('english', getattr(cls, field)).match(search_string, postgresql_regconfig='english')).all()
+    # def search_query(cls, session, search_string):
+    #     return session.query(cls).filter(cls.__ts_vector__.match(search_string)).subquery()
+        # session.query(cls).
+        # return session.query(cls).filter(func.to_tsvector('english', getattr(cls, field)).match(search_string, postgresql_regconfig='english')).all()
 
 
 

@@ -1,7 +1,7 @@
 from sqlalchemy import Column, String, ForeignKey
 from sqlalchemy.orm import relationship
 from routers.media.models import Image
-from utils import to_tsvector_ix
+# from utils import to_tsvector_ix
 from mixins import BaseMixin
 from database import Base
 

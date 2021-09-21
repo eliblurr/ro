@@ -2,7 +2,7 @@ from constants import Q_STR_X, SORT_STR_X, DT_X, Q_X, DT_Y, OPS
 from inspect import Parameter, Signature, signature
 from routers.media.models import Image as IM
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, func
 from sqlalchemy.sql import text
 import re, datetime, shutil, os
 from config import MEDIA_ROOT
@@ -36,34 +36,15 @@ class CRUD:
     async def read_by_id(self, id, db:Session):
         return db.query(self.model).filter(self.model.id==id).first()
 
-    # to lower -> remove case sensitivity
-    # .filter(
-    #     func.lower(Example.string_col)
-    #     .contains(search_string.lower(), autoescape=True)
-    # )
-    # .query.filter(Model.column.ilike("ganye"))
-    # from sqlalchemy import func
-    # user = models.User.query.filter(func.lower(User.username) == func.lower("GaNyE")).first()
-    # FTS
     async def read(self, params, db:Session):
-        # base = db.query(self.model)
-        # from sqlalchemy import func
-        # ext_filters = {x:params[x]if params[x]!='null' else None for x in params if x not in ["offset", "limit", "q", "sort", "action"] and params[x] is not None}
-        # # ext_filters = [f'{self.model.x}']
-        # # base = base.filter_by(**ext_filters)
-        # # f'{self.model.__table__.c[k].ilike(v if v is not None else None)}'
-        # a = [f'{self.model.__table__.c[k].ilike(v if v is not None else None)}' for k,v in ext_filters.items()]
-        # if a:
-        #     base = base.filter(and_(text(*a)))
-        # # print(base)
-        # return
         base = db.query(self.model)
         dt_cols = [col[0] for col in self.model.c() if col[1]==datetime.datetime]
         dte_filters = {x:params[x] for x in params if x in dt_cols and params[x] is not None}
-        ext_filters = {x:params[x] if params[x]!='null' else None for x in params if x not in ["offset", "limit", "q", "sort", "action", *dt_cols] and params[x] is not None}
+        ext_filters = {x:params[x] for x in params if x not in ["offset", "limit", "q", "sort", "action", *dt_cols] and params[x] is not None}
         dte_filters = [ f'{self.model.__table__.c[k]} {OPS.get(val.split(":", 1)[0], "==")} "{val.split(":", 1)[1]}"' if re.search(DT_Y, val) else f'{self.model.__table__.c[k]} == {val}' for k,v in dte_filters.items() for val in v]
+        ext_filters = [ func.lower(self.model.__table__.c[k])==func.lower(item) if item!='null' else self.model.__table__.c[k]==None for k,v in ext_filters.items() for item in v ]
 
-        base = base.filter_by(**ext_filters)
+        base = base.filter(*ext_filters)
 
         if dte_filters:
             base = base.filter(text(' AND '.join(dte_filters)))
@@ -71,14 +52,16 @@ class CRUD:
             sort = [f'{item[1:]} desc' if re.search(SORT_STR_X, item) else f'{item} asc' for item in params['sort']]
             base = base.order_by(text(*sort))
         if params['q']:
-            q_and, q_or = [], []
-            [q_and.append(item) if re.search(Q_STR_X, item) else q_or.append(item) for item in params['q']]
-            q_and = [self.model.__table__.c[item.split(':')[0]].like('%' + str(item.split(':')[1]) + '%') for item in q_and]
+            q_or, fts = [], []
+            [ q_or.append(item) if re.search(Q_STR_X, item) else fts.append(item) for item in params['q'] ]
+            q_or = [self.model.__table__.c[q.split(':')[0]].match(q.split(':')[1]) if q.split(':')[1]!='null' else self.model.__table__.c[q.split(':')[0]]==None for q in q_or]
+            
             if db.bind.dialect.name=='postgres':
-                q_or = [self.model.__ts_vector__.match(item) for item in q_or]
+                fts = [self.model.__ts_vector__.match(search_string) for search_string in fts]
             else:
-                q_or = [ or_(*[self.model.__table__.c[col].like('%' + str(val) + '%') for col in [col[0] for col in self.model.c()]]) for val in q_or ]
-            base = base.filter(and_(*q_and)).filter(and_(*q_or))
+                fts = [self.model.__table__.c[col].ilike('%' + str(val) + '%') for col in [col[0] for col in self.model.c()] for val in fts]
+
+            base = base.filter(or_(*q_or)).filter(*fts)
              
         data = base.offset(params['offset']).limit(params['limit']).all()
         return {'bk_size':base.count(), 'pg_size':data.__len__(), 'data':data}
@@ -125,7 +108,7 @@ class ContentQueryChecker:
         sort_str = "|".join([f"{x[0]}|-{x[0]}" for x in self._cols]) if self._cols else None
         q_str = "|".join([x[0] for x in self._cols]) if self._cols else None
         if self._cols:
-            params.extend([Parameter(param[0], Parameter.KEYWORD_ONLY, annotation=param[1], default=Query(None)) for param in self._cols if param[1]!=datetime.datetime])
+            params.extend([Parameter(param[0], Parameter.KEYWORD_ONLY, annotation=List[param[1]], default=Query(None)) for param in self._cols if param[1]!=datetime.datetime])
             params.extend([
                 Parameter(param[0], Parameter.KEYWORD_ONLY, annotation=List[str], default=Query(None, regex=DT_X)) for param in self._cols if param[1]==datetime.datetime
             ])
@@ -193,4 +176,13 @@ class Folder:
                 q = f'{self.model.__table__.c[k]} {OPS.get(op, "==")} {val}'
             else:
                 q = f'{self.model.__table__.c[k]} == {val}'
+
+    # q_and, q_or = [], []
+    # [q_and.append(item) if re.search(Q_STR_X, item) else q_or.append(item) for item in params['q']]
+    # q_and = [self.model.__table__.c[item.split(':')[0]].ilike('%' + str(item.split(':')[1]) + '%') for item in q_and]
+    # if db.bind.dialect.name=='postgres':
+    #     q_or = [self.model.__ts_vector__.match(item) for item in q_or]
+    # else:
+        # q_or = [ or_(*[self.model.__table__.c[col].ilike('%' + str(val) + '%') for col in [col[0] for col in self.model.c()]]) for val in q_or ]
+    # base = base.filter(and_(*q_and)).filter(and_(*q_or))
 '''

@@ -7,7 +7,7 @@ import sqlalchemy as sa
 from io import BytesIO
 from PIL import Image
 
-def to_tsvector_ix(lang, *columns):
+def to_tsvector(lang='pg_catalog.english', *columns):
     s = " || ' ' || ".join(columns)
     return sa.sql.func.to_tsvector(lang, sa.text(s))
 

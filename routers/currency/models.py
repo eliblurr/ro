@@ -7,6 +7,7 @@ import sqlalchemy
 class Currency(BaseMixin, FullTextSearchMixin, Base):
     '''Currency Model'''
     __tablename__ = "currencies"
+    __ftcols__ = ("title", "symbol")
 
     title = Column(String, unique=True, nullable=False)
     symbol = Column(String, nullable=True, unique=True)
