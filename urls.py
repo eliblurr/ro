@@ -4,7 +4,6 @@ from fastapi.openapi.utils import get_openapi
 from main import app
 import config as cfg
 
-
 from routers.ad.main import router as ad
 from routers.faq.main import router as faq
 from routers.meal.main import router as meal
