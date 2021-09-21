@@ -45,7 +45,6 @@ from fastapi.openapi.docs import (
 
 @app.get('/', name='Home', tags=['Docs'], include_in_schema=False)
 async def redoc_html():
-    return "success"
     def custom_openapi():
         openapi_schema = get_openapi(
             title=app.title,

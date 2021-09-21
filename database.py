@@ -3,8 +3,14 @@ from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker
 from config import settings
 
-# print(settings.DATABASE_URL)
-engine = create_engine(settings.DATABASE_URL)
+'''
+    current version of sqlalchemy does not support [postgres]:// 
+    hence change to postgresql to accomodate
+'''
+
+
+# engine = create_engine(settings.DATABASE_URL)
+engine = create_engine('postgresql:'+settings.DATABASE_URL.split(':', 1)[1])
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 metadata = MetaData()
