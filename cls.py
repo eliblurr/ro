@@ -56,7 +56,7 @@ class CRUD:
             [ q_or.append(item) if re.search(Q_STR_X, item) else fts.append(item) for item in params['q'] ]
             q_or = [self.model.__table__.c[q.split(':')[0]].match(q.split(':')[1]) if q.split(':')[1]!='null' else self.model.__table__.c[q.split(':')[0]]==None for q in q_or]
             
-            if db.bind.dialect.name=='postgres':
+            if db.bind.dialect.name=='postgresql':
                 fts = [self.model.__ts_vector__.match(search_string) for search_string in fts]
             else:
                 fts = [self.model.__table__.c[col].ilike('%' + str(val) + '%') for col in [col[0] for col in self.model.c()] for val in fts]

@@ -133,17 +133,16 @@ class GenCodeMixin(object):
     code = Column(String, unique=False, default=gen_code)
 
 class FullTextSearchMixin(object):
-    if engine.name == 'postgres':
+    if engine.name == 'postgresql':
         @declared_attr
         def __ts_vector__(cls):
             return Column(TSVectorType(*cls.__ftcols__))
 
-    @declared_attr
-    def __table_args__(cls):
-        if engine.name == 'postgres':
+        @declared_attr
+        def __table_args__(cls):
             return (
                 Index(
-                    'ix_%s__ts_vector__' % cls.__tablename__, 
+                    'ix_%s___ts_vector__' % cls.__tablename__, 
                     cls.__ts_vector__, 
                     postgresql_using='gin'
                 ),
