@@ -29,7 +29,7 @@ METHODS = ["*"]
 JWT_ALGORITHM = "HS256"
 
 class Settings(BaseSettings):
-    DATABASE_URL: str
+    DATABASE_URL: str = 'postgres://kgdbkrqrytwzva:62dff4e2cb28611704ee00fe4971e4f39f4c19a1cb4078a8d2525ee06f534dd0@ec2-18-209-143-227.compute-1.amazonaws.com:5432/d4odr6h2cibgfg'
     TWILIO_PHONE_NUMBER: str = '+16196584362' 
     SMS_CODE_VALID_DURATION_IN_MINUTES: int = 5
     ACCESS_SESSION_DURATION_IN_MINUTES: int = 30
