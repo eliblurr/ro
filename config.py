@@ -51,7 +51,7 @@ class Settings(BaseSettings):
     VALIDATE_CERTS: bool = True
     DEFAULT_MAIL_SUBJECT: str = "SOME DEFAULT SUBJECT HERE"
 
-    class Config:
-        env_file = ".env"
+    # class Config:
+    #     env_file = ".env"
 
 settings = Settings()
