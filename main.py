@@ -45,3 +45,5 @@ from database import engine
 @app.post("/init")
 def init():  
     Base.metadata.create_all(bind=engine)
+
+    # uvicorn main:app --host=0.0.0.0 --port=${PORT:-5000}
