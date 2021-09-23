@@ -22,10 +22,10 @@ class CRUD:
         if images:
             obj.images.extend([
                 IM(
-                    detail =  f"{cfg.IMAGE_URL}{utils.create_image(image_b, cfg.IMAGE_ROOT)}", 
-                    small = f"{cfg.IMAGE_URL}{utils.create_image(image_b, cfg.IMAGE_ROOT, cfg.SMALL)}",
-                    listquad = f"{cfg.IMAGE_URL}{utils.create_image(image_b, cfg.IMAGE_ROOT, cfg.LISTQUAD)}",
-                    thumbnail = f"{cfg.IMAGE_URL}{utils.create_image(image_b, cfg.IMAGE_ROOT, cfg.THUMBNAIL)}", 
+                    detail =  f"{cfg.IMAGE_URL}{create_image(image_b, cfg.IMAGE_ROOT)}", 
+                    small = f"{cfg.IMAGE_URL}{create_image(image_b, cfg.IMAGE_ROOT, cfg.SMALL)}",
+                    listquad = f"{cfg.IMAGE_URL}{create_image(image_b, cfg.IMAGE_ROOT, cfg.LISTQUAD)}",
+                    thumbnail = f"{cfg.IMAGE_URL}{create_image(image_b, cfg.IMAGE_ROOT, cfg.THUMBNAIL)}", 
                 ) for image_b in [image.file.read() for image in images]
             ])
         db.add(obj)
