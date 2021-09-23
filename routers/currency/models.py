@@ -8,23 +8,13 @@ class Currency(BaseMixin, FullTextSearchMixin, Base):
     '''Currency Model'''
     __tablename__ = "currencies"
     __ftcols__ = ("title", "symbol")
-
+    
     title = Column(String, unique=True, nullable=False)
     symbol = Column(String, nullable=True, unique=True)
 
-def insert_initial_values(*args, **kwargs):
-    db = SessionLocal()
-    db.add_all([Currency(title=currency.value, symbol=None) for currency in C])
-    db.commit()
+def after_create(target, connection, **kw):
+    connection.execute(
+        Currency.__table__.insert(), [{"title":C.value} for C in C]
+    )
 
-# event.listen(Currency.__table__, 'after_create', insert_initial_values)
-
-# @event.listens_for(Currency.__table__, 'after_create')
-# def insert_initial_values(*args, **kwargs):
-#     db = SessionLocal()
-#     db.add_all([Currency(title=currency.value, symbol=None) for currency in C])
-#     db.commit()
-
-# @event.listens_for(SMSVerificationCode, 'before_insert')
-# def delete_existing_value(mapper, connection, target):
-#     connection.execute("""DELETE FROM :table WHERE phone=:phone;""",{'table':SMSVerificationCode.__tablename__,'phone':target.phone})
+event.listen(Currency.__table__, "after_create", after_create)

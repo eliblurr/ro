@@ -35,7 +35,7 @@ async def shutdown_event():
     scheduler.shutdown()
 
 from urls import *
-from routers.currency.models import Base, insert_initial_values
+from routers.currency.models import Base
 from routers.restaurant.models import Base
 from routers.location.models import Base
 from routers.meal.models import Base
@@ -43,6 +43,5 @@ from routers.users.accounts.models import Base
 from database import engine
 
 @app.post("/init")
-def init():
+def init():  
     Base.metadata.create_all(bind=engine)
-    insert_initial_values()

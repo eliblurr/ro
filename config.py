@@ -55,5 +55,3 @@ class Settings(BaseSettings):
         env_file = ".env"
 
 settings = Settings()
-
-# gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app

@@ -41,28 +41,23 @@ class CRUD:
         dt_cols = [col[0] for col in self.model.c() if col[1]==datetime.datetime]
         dte_filters = {x:params[x] for x in params if x in dt_cols and params[x] is not None}
         ext_filters = {x:params[x] for x in params if x not in ["offset", "limit", "q", "sort", "action", *dt_cols] and params[x] is not None}
-        dte_filters = [ f'{self.model.__table__.c[k]} {OPS.get(val.split(":", 1)[0], "==")} "{val.split(":", 1)[1]}"' if re.search(DT_Y, val) else f'{self.model.__table__.c[k]} == {val}' for k,v in dte_filters.items() for val in v]
-        ext_filters = [ func.lower(self.model.__table__.c[k])==func.lower(item) if item!='null' else self.model.__table__.c[k]==None for k,v in ext_filters.items() for item in v ]
+        dte_filters = [ f'{getattr(self.model, k)} {OPS.get(val.split(":", 1)[0], "==")} "{val.split(":", 1)[1]}"' if re.search(DT_Y, val) else f'{getattr(self.model, k)} == {val}' for k,v in dte_filters.items() for val in v]
+        ext_filters = [ getattr(self.model, k).match(item) if item!='null' else getattr(self.model, k)==None for k,v in ext_filters.items() for item in v ]
 
         base = base.filter(*ext_filters)
 
         if dte_filters:
-            base = base.filter(text(' AND '.join(dte_filters)))
+            base = base.filter(*dte_filters)
         if params['sort']:
             sort = [f'{item[1:]} desc' if re.search(SORT_STR_X, item) else f'{item} asc' for item in params['sort']]
             base = base.order_by(text(*sort))
         if params['q']:
             q_or, fts = [], []
             [ q_or.append(item) if re.search(Q_STR_X, item) else fts.append(item) for item in params['q'] ]
-            q_or = [self.model.__table__.c[q.split(':')[0]].match(q.split(':')[1]) if q.split(':')[1]!='null' else self.model.__table__.c[q.split(':')[0]]==None for q in q_or]
-            
-            if db.bind.dialect.name=='postgresql':
-                fts = [self.model.__ts_vector__.match(search_string) for search_string in fts]
-            else:
-                fts = [self.model.__table__.c[col].ilike('%' + str(val) + '%') for col in [col[0] for col in self.model.c()] for val in fts]
-
-            base = base.filter(or_(*q_or)).filter(*fts)
-             
+            q_or = or_(*[getattr(self.model, q.split(':')[0]).match(q.split(':')[1]) if q.split(':')[1]!='null' else getattr(self.model, q.split(':')[0])==None for q in q_or])
+            fts = or_(*[getattr(self.model, col[0]).ilike(f'%{val}%') for col in self.model.c() if col[1]==str for val in fts])
+            # fts = or_(*[self.model.__ts_vector__.match(search_string) for search_string in fts])
+            base = base.filter(fts).filter(q_or)
         data = base.offset(params['offset']).limit(params['limit']).all()
         return {'bk_size':base.count(), 'pg_size':data.__len__(), 'data':data}
             
@@ -145,6 +140,16 @@ class Folder:
         return f'{self.base_dir}/{self.name}'
 
 '''
+    # q_or = [self.model.__table__.c[q.split(':')[0]].match(q.split(':')[1]) if q.split(':')[1]!='null' else self.model.__table__.c[q.split(':')[0]]==None for q in q_or]
+                
+            # if db.bind.dialect.name=='postgresql':
+            # #     fts = [self.model.__ts_vector__.match(f'{search_string} & us') for search_string in fts]
+            # #     fts = [self.model.__table__.c[col].ilike('%' + str(val) + '%') for col in [col[0] for col in self.model.c()] for val in fts]
+            #     fts = or_(*[self.model.__ts_vector__.match(search_string) for search_string in fts])
+            # else:
+
+    # text(' AND '.join(dte_filters))
+
     NOTES
     # 1. exact filter *
     # 2. like AND filter -> q k:v *
@@ -168,14 +173,14 @@ class Folder:
     x = [ or_(*[self.model.__table__.c[col].like('%' + str(val) + '%') for col in cols]) for val in vals ]
     base = base.filter(and_(*x))
 
-    dte_filters = [ f'{self.model.__table__.c[k]} {OPS.get(val.split(":", 1)[0], "==")} {val.split(":", 1)[1]}' if re.search(DT_Y, val) else f'{self.model.__table__.c[k]} == {val}' for k,v in dte_filters.items() for val in v]
+    dte_filters = [ f'{getattr(self.model, k)} {OPS.get(val.split(":", 1)[0], "==")} {val.split(":", 1)[1]}' if re.search(DT_Y, val) else f'{getattr(self.model, k)} == {val}' for k,v in dte_filters.items() for val in v]
     for val in v for k,v in dte_filters.items()
         for val in v:
             if re.search(DT_Y, val):
                 op, val = val.split(':', 1)
-                q = f'{self.model.__table__.c[k]} {OPS.get(op, "==")} {val}'
+                q = f'{getattr(self.model, k)} {OPS.get(op, "==")} {val}'
             else:
-                q = f'{self.model.__table__.c[k]} == {val}'
+                q = f'{getattr(self.model, k)} == {val}'
 
     # q_and, q_or = [], []
     # [q_and.append(item) if re.search(Q_STR_X, item) else q_or.append(item) for item in params['q']]
