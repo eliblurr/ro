@@ -90,3 +90,6 @@ def create_jwt(data:dict, expires_delta:Optional[timedelta]=None):
 
 def decode_jwt(jwt:str):
     return jwt.decode(data, settings.SECRET_KEY, settings.ALGORITHM)
+
+def str_to_datetime(string, frmt='%Y-%m-%d %H:%M:%S'):
+    return datetime.strptime(string, frmt)

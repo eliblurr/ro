@@ -1,17 +1,17 @@
-from utils import gen_code, http_exception_detail, schema_to_model
+from utils import gen_code, http_exception_detail, schema_to_model, str_to_datetime, create_image
 from constants import Q_STR_X, SORT_STR_X, DT_X, Q_X, DT_Y, OPS
 from inspect import Parameter, Signature, signature
 from routers.media.models import Image as IM
 from sqlalchemy import and_, or_, func
+import re, datetime, shutil, os, enum
 from fastapi import Query, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
-import re, datetime, shutil, os
 from config import MEDIA_ROOT
 from functools import wraps
-import utils, config as cfg
 from typing import List
 from PIL import Image
+import config as cfg
 
 class CRUD:
     def __init__(self, model):
@@ -39,15 +39,24 @@ class CRUD:
     async def read(self, params, db:Session):
         base = db.query(self.model)
         dt_cols = [col[0] for col in self.model.c() if col[1]==datetime.datetime]
-        dte_filters = {x:params[x] for x in params if x in dt_cols and params[x] is not None}
-        ext_filters = {x:params[x] for x in params if x not in ["offset", "limit", "q", "sort", "action", *dt_cols] and params[x] is not None}
-        dte_filters = [ f'{getattr(self.model, k)} {OPS.get(val.split(":", 1)[0], "==")} "{val.split(":", 1)[1]}"' if re.search(DT_Y, val) else f'{getattr(self.model, k)} == {val}' for k,v in dte_filters.items() for val in v]
-        ext_filters = [ getattr(self.model, k).match(item) if item!='null' else getattr(self.model, k)==None for k,v in ext_filters.items() for item in v ]
+        ex_cols = [col[0] for col in self.model.c() if col[1]==int or col[1]==bool or issubclass(col[1], enum.Enum)]
+        
+        dte_filters = {x:params[x] for x in params if x in dt_cols and params[x] is not None} 
+        ex_filters = {x:params[x] for x in params if x  in ex_cols and  params[x] is not None}
+        ext_filters = {x:params[x] for x in params if x not in ["offset", "limit", "q", "sort", "action", *dt_cols, *ex_cols] and params[x] is not None}
+        filters = [ getattr(self.model, k).match(item) if item!='null' else getattr(self.model, k)==None for k,v in ext_filters.items() for item in v ]
+        filters.extend([getattr(self.model, k)==item if item!='null' else getattr(self.model, k)==None for k,v in ex_filters.items() for item in v ])
+        filters.extend([
+            getattr(self.model, k) >= str_to_datetime(val.split(":", 1)[1]) if val.split(":", 1)[0]=='gte'
+            else getattr(self.model, k) <= str_to_datetime(val.split(":", 1)[1]) if val.split(":", 1)[0]=='lte'
+            else getattr(self.model, k) > str_to_datetime(val.split(":", 1)[1]) if val.split(":", 1)[0]=='gt'
+            else getattr(self.model, k) < str_to_datetime(val.split(":", 1)[1]) if val.split(":", 1)[0]=='lt'
+            else getattr(self.model, k) == str_to_datetime(val)
+            for k,v in dte_filters.items() for val in v 
+        ])
 
-        base = base.filter(*ext_filters)
+        base = base.filter(*filters)
 
-        if dte_filters:
-            base = base.filter(*dte_filters)
         if params['sort']:
             sort = [f'{item[1:]} desc' if re.search(SORT_STR_X, item) else f'{item} asc' for item in params['sort']]
             base = base.order_by(text(*sort))
@@ -140,6 +149,9 @@ class Folder:
         return f'{self.base_dir}/{self.name}'
 
 '''
+# base = base.filter(text(' AND '.join(dte_filters)))
+        # dte_filters = [ f'{getattr(self.model, k)} {OPS.get(val.split(":", 1)[0], "==")} "{val.split(":", 1)[1]}"' if re.search(DT_Y, val) else f'{getattr(self.model, k)} == {val}' for k,v in dte_filters.items() for val in v]
+
     # q_or = [self.model.__table__.c[q.split(':')[0]].match(q.split(':')[1]) if q.split(':')[1]!='null' else self.model.__table__.c[q.split(':')[0]]==None for q in q_or]
                 
             # if db.bind.dialect.name=='postgresql':
