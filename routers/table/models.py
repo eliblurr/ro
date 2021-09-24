@@ -8,5 +8,5 @@ class Table(BaseMixin, Base):
     __tablename__ = "tables"
     __table_args__ = (UniqueConstraint('code', 'restaurant_id', name='uix_code_restaurant_fk'),)
 
-    code = Column(String, nullable=False, default=gen_code)
     restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
+    code = Column(String, unique=True, nullable=False, default=gen_code) 
