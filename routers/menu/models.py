@@ -15,7 +15,7 @@ class Menu(BaseMixin, Base):
     description = Column(String, nullable=False)
     restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
     images = relationship('Image', uselist=True, cascade="all, delete")
-    meals = relationship('Meal', secondary='menu_meals', backref='menu', lazy='dynamic')
+    meals = relationship("Meal", secondary='menu_meals', backref='menu')
 
 class MenuMeal(Base):
     __tablename__ = "menu_meals"

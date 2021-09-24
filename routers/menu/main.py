@@ -11,12 +11,14 @@ router = APIRouter()
 async def create(payload:schemas.CreateMenu=Depends(schemas.CreateMenu.as_form), images:List[UploadFile]=File(None), db:Session=Depends(get_db)):
     return await crud.menu.create(payload, db, images)
 
+# @router.post('/{resource_id}/meals', description='', response_model=schemas.Menu, name='Menu')
+# async def read_by_id(resource_id:int, db:Session=Depends(get_db)):
+#     return await crud.menu.read_by_id(resource_id, db)
+
 @router.get('/', description='', response_model=schemas.MenuList, name='Menu')
 @ContentQueryChecker(crud.menu.model.c(), None)
 async def read(db:Session=Depends(get_db), **params):
-    a = await crud.menu.read(params, db)
-    print(a.get("meals"))
-    return a
+    return await crud.menu.read(params, db)
 
 @router.get('/{resource_id}', description='', response_model=schemas.Menu, name='Menu')
 async def read_by_id(resource_id:int, db:Session=Depends(get_db)):
