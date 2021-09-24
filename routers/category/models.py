@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, ForeignKey
+from sqlalchemy import Column, String, Integer, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from routers.media.models import Image
 from routers.meal.models import Meal
@@ -8,6 +8,8 @@ from database import Base
 class Category(BaseMixin, Base):
     '''Category Model'''
     __tablename__ = "categories"
+    __table_args__ = (UniqueConstraint('title', 'restaurant_id', name='uix_title_restaurant_fk'),)
+    # unique constraint on coalesce(restaurant_id not null & title) + title
     
     title = Column(String, nullable=False)
     metatitle = Column(String, nullable=True)

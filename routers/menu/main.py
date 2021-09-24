@@ -12,9 +12,11 @@ async def create(payload:schemas.CreateMenu=Depends(schemas.CreateMenu.as_form),
     return await crud.menu.create(payload, db, images)
 
 @router.get('/', description='', response_model=schemas.MenuList, name='Menu')
-@ContentQueryChecker(crud.Menu.model.c(), None)
+@ContentQueryChecker(crud.menu.model.c(), None)
 async def read(db:Session=Depends(get_db), **params):
-    return await crud.menu.read(params, db)
+    a = await crud.menu.read(params, db)
+    print(a.get("meals"))
+    return a
 
 @router.get('/{resource_id}', description='', response_model=schemas.Menu, name='Menu')
 async def read_by_id(resource_id:int, db:Session=Depends(get_db)):

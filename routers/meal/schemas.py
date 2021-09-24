@@ -18,7 +18,7 @@ class MealBase(BaseModel):
 
 @as_form
 class CreateMeal(MealBase):
-    pass
+    restaurant_id: int
 
 class UpdateMeal(BaseModel):
     title: Optional[str]
@@ -31,9 +31,9 @@ class Meal(MealBase):
     id: int
     created: datetime.datetime
     updated: datetime.datetime
-    currency: Union[CurrencyBase, None]
     images: List[Union[ImageBase, None]]
     ratings: List[Union[RatingBase, None]]
+    currency: Union[CurrencyBase, str, None]
 
 class MealList(BaseModel):
     bk_size: int

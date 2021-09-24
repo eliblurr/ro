@@ -1,14 +1,15 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, File, UploadFile
 from cls import ContentQueryChecker
 from sqlalchemy.orm import Session
 from dependencies import get_db
 from . import crud, schemas
+from typing import List
 
 router = APIRouter()
 
 @router.post('/', description='', response_model=schemas.Category, status_code=201, name='Category')
-async def create(payload:schemas.CreateCategory, db:Session=Depends(get_db)):
-    return await crud.category.create(payload, db)
+async def create(payload:schemas.CreateCategory=Depends(schemas.CreateCategory.as_form), images:List[UploadFile]=File(None), db:Session=Depends(get_db)):
+    return await crud.category.create(payload, db, images)
 
 @router.get('/', description='', response_model=schemas.CategoryList, name='Category')
 @ContentQueryChecker(crud.category.model.c(), None)

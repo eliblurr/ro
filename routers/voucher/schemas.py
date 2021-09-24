@@ -13,8 +13,7 @@ class VoucherBase(BaseModel):
 import routers.order.models as  m
 
 class CreateVoucher(VoucherBase):
-    restaurant_id: int
-    # order_id: Optional[int]
+    restaurant_id: Optional[int]
 
     class Meta:
         model = m.Voucher
@@ -27,6 +26,7 @@ class UpdateVoucher(BaseModel):
 
 class Voucher(VoucherBase):
     id: int
+    code: str
     created: datetime.datetime
     updated: datetime.datetime
 

@@ -6,6 +6,7 @@ import config as cfg
 
 from routers.ad.main import router as ad
 from routers.faq.main import router as faq
+from routers.menu.main import router as menu
 from routers.meal.main import router as meal
 from routers.table.main import router as table
 from routers.media.main import router as media
@@ -26,6 +27,7 @@ app.include_router(location, tags=['Locations'])
 app.include_router(ad, tags=['Adverts'], prefix='/ads')
 app.include_router(role, tags=['Roles'], prefix='/roles')
 app.include_router(meal, tags=['Meals'], prefix='/meals')
+app.include_router(menu, tags=['Menus'], prefix='/menus')
 app.include_router(order, tags=['Orders'], prefix='/orders')
 app.include_router(table, tags=['Tables'], prefix='/tables')
 app.include_router(media, tags=['Media'], prefix='/uploads')

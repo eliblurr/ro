@@ -60,7 +60,7 @@ class SubCountryList(BaseModel):
 
 class CityBase(BaseModel):
     title: str
-    postcode: Optional[int]
+    postcode: Optional[str]
 
 class CreateCity(CityBase):
     subcountry_id:int

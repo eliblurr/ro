@@ -1,15 +1,15 @@
 from typing import Optional, List
-from pydantic import BaseModel
+from pydantic import BaseModel, conint
 import datetime
 
 class TableBase(BaseModel):
-    number: int
+    code: Optional[str]
       
 class CreateTable(TableBase):
     restaurant_id: int
     
 class UpdateTable(BaseModel):
-    number: Optional[int]
+    code: Optional[str]
     status: Optional[bool]
     restaurant_id: Optional[int]
 

@@ -1,12 +1,12 @@
+from pydantic import BaseModel, conint
 from typing import Optional, List
-from pydantic import BaseModel
 import datetime
 
 class PolicyBase(BaseModel):
     title: str
-    pos_index: int
     description: str
     status: Optional[bool]
+    pos_index: conint(gt=0)
     metatitle: Optional[str]
     
 class CreatePolicy(PolicyBase):
@@ -16,8 +16,8 @@ class UpdatePolicy(BaseModel):
     title: Optional[str]
     status: Optional[bool]
     metatitle: Optional[str]
-    pos_index: Optional[int]
     description: Optional[str]
+    pos_index: Optional[conint(gt=0)]
 
 class Policy(PolicyBase):
     id: int

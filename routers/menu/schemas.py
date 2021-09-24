@@ -1,16 +1,25 @@
 from routers.media.schemas import Image
-from typing import Optional, List
+from typing import Optional, List, Union
 from pydantic import BaseModel
 from utils import as_form
 import datetime
 
 from routers.meal.schemas import Meal
 
+class MealMenuBase(BaseModel):
+    meal:Meal
+
+    class Config:
+        orm_mode = True
+
 class MenuBase(BaseModel):
     title: str
     description: str
     status: Optional[bool]
     metatitle: Optional[str]
+
+    class Config:
+        orm_mode = True
 
 @as_form
 class CreateMenu(MenuBase):
@@ -27,11 +36,8 @@ class Menu(MenuBase):
     id: int
     created: datetime.datetime
     updated: datetime.datetime
-    meals: Optional[List[Meal]]
+    # meals: List[Meal] = None
     images: Optional[List[Image]]
-
-    class Config:
-        orm_mode = True
 
 class MenuList(BaseModel):
     bk_size: int

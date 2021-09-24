@@ -28,8 +28,8 @@ class UpdateRole(BaseModel):
 class Role(RoleBase):
     id: int
     permissions: int
-    created_at: datetime.datetime
-    updated_at: datetime.datetime
+    created: datetime.datetime
+    updated: datetime.datetime
 
 class RoleList(BaseModel):
     bk_size: int

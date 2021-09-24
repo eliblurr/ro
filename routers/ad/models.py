@@ -13,3 +13,4 @@ class AD(BaseMixin, Base):
     metatitle = Column(String, nullable=True)
     description = Column(String, nullable=True)
     images = relationship('Image', uselist=True, cascade="all, delete")
+    # available in

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Float, ForeignKey
+from sqlalchemy import Column, String, Integer, Float, ForeignKey, UniqueConstraint
 from sqlalchemy.ext.hybrid import hybrid_property
 from routers.rating.models import Rating
 from sqlalchemy.orm import relationship
@@ -9,6 +9,7 @@ from database import Base
 class Meal(BaseMixin, Base):
     '''Meal Model'''
     __tablename__ = "meals"
+    __table_args__ = (UniqueConstraint('title', 'restaurant_id', name='uix_title_restaurant_fk'),)
 
     cost = Column(Float, nullable=False)
     title = Column(String, nullable=False)
@@ -21,4 +22,4 @@ class Meal(BaseMixin, Base):
 
     @hybrid_property
     def currency(self):
-        return self.restaurant.city.subcountry.country.currency
+        return self.restaurant.city.subcountry.country.currency.title

@@ -3,3 +3,6 @@ class UnboundTenantError(Exception):
 
 class TenantConflict(Exception):
     pass
+
+class MaxOccurrenceError(Exception):
+    pass

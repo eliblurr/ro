@@ -12,7 +12,7 @@ class CategoryBase(BaseModel):
 
 @as_form
 class CreateCategory(CategoryBase):
-    restaurant_id: int
+    restaurant_id: Optional[int]
 
 class UpdateCategory(BaseModel):
     title: Optional[str]

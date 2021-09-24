@@ -1,14 +1,15 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, File, UploadFile
 from cls import ContentQueryChecker
 from sqlalchemy.orm import Session
 from dependencies import get_db
 from . import crud, schemas
+from typing import List
 
 router = APIRouter()
 
 @router.post('/', description='', response_model=schemas.AD, status_code=201, name='AD')
-async def create(payload:schemas.CreateAD, db:Session=Depends(get_db)):
-    return await crud.ad.create(payload, db)
+async def create(payload:schemas.CreateAD=Depends(schemas.CreateAD.as_form), images:List[UploadFile]=File(None), db:Session=Depends(get_db)):
+    return await crud.ad.create(payload, db, images)
 
 @router.get('/', description='', response_model=schemas.ADList, name='AD')
 @ContentQueryChecker(crud.ad.model.c(), None)
