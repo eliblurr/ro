@@ -46,4 +46,8 @@ from database import engine
 def init():  
     Base.metadata.create_all(bind=engine)
 
+@app.delete("/terminate")
+def terminate():  
+    Base.metadata.drop_all(bind=engine)
+    
     # uvicorn main:app --host=0.0.0.0 --port=${PORT:-5000}
