@@ -30,6 +30,7 @@ class UpdateOrderMeal(BaseModel):
     status: Optional[OrderMealState]
     
 class OrderMeal(BaseModel):
+    id:int
     meal: Meal
     status: enum.Enum
     quantity: Optional[int]
