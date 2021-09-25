@@ -24,9 +24,17 @@ async def read(db:Session=Depends(get_db), **params):
 async def read_by_id(resource_id:int, db:Session=Depends(get_db)):
     return await crud.order.read_by_id(resource_id, db)
 
+@router.patch('/meals', description='', name='Order Meal')
+async def update(id:int, payload:schemas.UpdateOrderMeal, db:Session=Depends(get_db)):
+    return await crud.order_meal.bk_update(payload, db, id=id)
+
 @router.put('/{resource_id}', description='', response_model=schemas.Order, name='Order')
 async def update(resource_id:int, payload:schemas.UpdateOrder, db:Session=Depends(get_db)):
-    return await crud.order.update(resource_id, payload, db)
+    if payload.meals:
+        for item in payload.meals:
+            item.order_id = resource_id
+        await crud.order_meal.bk_create(payload.meals, db)
+    return await crud.order.update(resource_id, payload.copy(exclude={'meals'}), db)
 
 @router.delete('/{resource_id}', description='', name='Order')
 async def delete(resource_id:int, db:Session=Depends(get_db)):

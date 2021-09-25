@@ -1,5 +1,6 @@
 from routers.voucher.schemas import Voucher
 from typing import Optional, List, Union
+from routers.table.schemas import Table
 from routers.meal.schemas import Meal
 import routers.order.models as  m
 from pydantic import BaseModel
@@ -19,59 +20,59 @@ class OrderMealState(str, enum.Enum):
 class CreateOrderMeal(BaseModel):
     meal_id: int
     quantity: int
+    order_id: Optional[int]
 
     class Meta:
         model = m.OrderMeal
 
 class UpdateOrderMeal(BaseModel):
-    meal_id: int
     quantity: Optional[int]
     status: Optional[OrderMealState]
     
 class OrderMeal(BaseModel):
     meal: Meal
-    # status: Optional[str] = None
-    # status: OrderMealState
+    status: enum.Enum
     quantity: Optional[int]
 
     class Config:
         orm_mode = True
 
 class OrderBase(BaseModel):
-    pass
-    # status: Optional[OrderState]
+    status: Optional[enum.Enum]
+
+    class Meta:
+        model = m.Order
 
 class CreateOrder(OrderBase):
     table_id: int
     voucher_id: Optional[int]
     meals: List[CreateOrderMeal]
-    # restaurant_id: int
 
     class Config:
         orm_mode = True
 
-    class Meta:
-        model = m.Order
-
 class UpdateOrder(BaseModel):
     table_id: Optional[int]
     voucher_id: Optional[int]
-    meals: Optional[Union[CreateOrderMeal, UpdateOrderMeal]]
+    meals: Optional[List[CreateOrderMeal]]
+
+    class Meta:
+        model = m.Order
 
 class Order(OrderBase):
     id: int
     total: float
-    currency: Union[str, None]
+    table: Table
+    order_code: str
+    status: enum.Enum 
     total: Union[float, None]
+    currency: Union[str, None]
+    voucher: Optional[Voucher]
     created: datetime.datetime
     updated: datetime.datetime
-    # restaurant_id: Optional[int]
-    # table_restaurant: Optional[int]
-    # total_to_pay: Union[float, None]
-    voucher: Optional[Voucher]
-    # meals: Optional[List[OrderMeal]]
-    # status: OrderState = OrderState.active
-
+    amount_paid: Optional[float]
+    meals: Optional[List[OrderMeal]]
+    
     class Config:
         orm_mode = True
 

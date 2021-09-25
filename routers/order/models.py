@@ -28,7 +28,8 @@ class OrderMeal(BaseMethodMixin, Base):
     meal = relationship('Meal', uselist=False)
     quantity = Column(Integer, nullable=False) # -> translates to number of occrences
     meal_id = Column(Integer, ForeignKey('meals.id'))
-    order_id = Column(Integer, ForeignKey('orders.id'), primary_key=True)
+    order_id = Column(Integer, ForeignKey('orders.id'))
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     status = Column(Enum(OrderMealState), default=OrderMealState.pending, nullable=False) 
     sub_total = column_property((select(Meal.cost).where(Meal.id==meal_id).correlate_except(Meal).scalar_subquery()) * quantity)
 

@@ -117,7 +117,7 @@ class CRUD:
         try:
             rows = db.query(self.model).filter_by(**kwargs).update(payload.dict(exclude_unset=True), synchronize_session="fetch")
             db.commit()
-            return rows
+            return 'success', {"info":f"{rows} row(s) updated"}
         except Exception as e:
             raise HTTPException(status_code=500, detail=http_exception_detail(msg=f"{e}", type= e.__class__.__name__))
 
