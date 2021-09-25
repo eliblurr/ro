@@ -65,15 +65,16 @@ class AdminList(BaseModel):
 class UserBase(BaseModel):
     code: str
     role_id: int
-    password: str
+    restaurant_id: int
     
     class Config:
         orm_mode = True
       
 class CreateUser(UserBase):
+    password: str
     permission: Optional[int]
     
-class UpdateUser(UserBase):
+class UpdateUser(BaseModel):
     code: Optional[str]
     role_id: Optional[int]
     password: Optional[str]

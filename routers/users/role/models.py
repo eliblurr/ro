@@ -11,3 +11,4 @@ class Role(BaseMixin, Base):
     description = Column(String, nullable=True)  
     users = relationship('User', back_populates="roles", uselist=True, cascade="all, delete", lazy='dynamic')
     permissions = 0
+    # restaurant_id

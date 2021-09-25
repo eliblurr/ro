@@ -6,6 +6,11 @@ from constants import PHONE
 from database import Base
 import re
 
+class RestaurantVerificationCode(GenCodeMixin, Base):
+    __tablename__ = 'restaurant_verication_codes'
+
+    email = Column(String, unique=True, primary_key=True)
+
 class PasswordResetCode(GenCodeMixin, Base):
     __tablename__ = 'password_reset_codes'
 
@@ -32,4 +37,8 @@ def delete_existing_value(mapper, connection, target):
 
 @event.listens_for(SMSVerificationCode, 'before_insert')
 def delete_existing_value(mapper, connection, target):
-    connection.execute("""DELETE FROM :table WHERE phone=:phone;""",{'table':SMSVerificationCode.__tablename__,'phone':target.phone})
+    connection.execute("""DELETE FROM :table WHERE phone=:phone;""",{'table':SMSVerificationCode.__tablename__, 'phone':target.phone})
+
+@event.listens_for(RestaurantVerificationCode, 'before_insert')
+def delete_existing_value(mapper, connection, target):
+    connection.execute("""DELETE FROM :table WHERE email=:email;""",{'table':RestaurantVerificationCode.__tablename__, 'email':target.email})

@@ -12,11 +12,12 @@ from typing import Union
 
 router = APIRouter()
 
-def verify_auth_payload(usertype:schemas.UserTypes, payload:Union[schemas.UserLogin, schemas.AdminLogin, schemas.CustomerLogin]):
+def verify_auth_payload(usertype:schemas.UserTypes, payload:Union[schemas.UserLogin, schemas.AdminLogin, schemas.CustomerLogin, schemas.RestaurantLogin]):
     case = (
         usertype.value == 'users' and payload.__class__==schemas.UserLogin, 
         usertype.value == 'admins' and payload.__class__==schemas.AdminLogin,
-        usertype.value == 'customers' and payload.__class__==schemas.CustomerLogin
+        usertype.value == 'customers' and payload.__class__==schemas.CustomerLogin,
+        usertype.value == 'restaurants' and payload.__class__==schemas.RestaurantLogin
     )    
     if not any(case):
         raise HTTPException(status_code=422, detail=http_exception_detail(loc=[usertype,payload.dict()], msg='selected userType mismatch with payload', type="Payload_UserType mismatch"))
@@ -24,10 +25,9 @@ def verify_auth_payload(usertype:schemas.UserTypes, payload:Union[schemas.UserLo
 
 @router.post('/login', description='', response_model=schemas.LoginResponse, name='Login')
 async def authenticate(data=Depends(verify_auth_payload), db:Session=Depends(get_db)):
-    user = await crud.verify_user(data["payload"], db) if data["usertype"] == "users" else await crud.verify_admin(data["payload"], db) \
-           if data["usertype"] == "admins" else await crud.verify_user(data["payload"], db) if data["usertype"] == "customers" else None
+    func = crud.verify_user if data["usertype"] == "users" else crud.verify_admin if data["usertype"] == "admin" else crud.verify_user if data['usertype']=='admin' else crud.verify_restaurant
 
-    data = {"userType":data["usertype"], "user":user}
+    data = {"userType":data["usertype"], "user":await func(data["payload"], db)}
 
     return {
         "access_token":create_jwt(data=data),

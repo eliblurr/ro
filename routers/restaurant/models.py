@@ -32,6 +32,7 @@ class Restaurant(BaseMixin, Base):
     orders = relationship('Order', back_populates="restaurant", cascade="all, delete")
     tables = relationship('Table', back_populates="restaurant", uselist=True, cascade="all, delete")
     menus = relationship('Menu', secondary='restaurant_menus', backref='restaurant', lazy='dynamic')
+    # permissions
 
     @validates('email')
     def validate_email(self, key, value):
