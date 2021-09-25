@@ -84,7 +84,7 @@ class CRUD:
             data = base.offset(params['offset']).limit(params['limit']).all()
             return {'bk_size':base.count(), 'pg_size':data.__len__(), 'data':data}
         except Exception as e:
-            raise HTTPException(status_code=500, detail=http_exception_detail(msg=e._message().split('DETAIL:  ', 1)[1], type= e.__class__.__name__))
+            raise HTTPException(status_code=500, detail=http_exception_detail(msg=f"{e}", type= e.__class__.__name__))
             
     async def update(self, id, payload, db:Session, images=None):
         try:
@@ -96,7 +96,7 @@ class CRUD:
         except MaxOccurrenceError as e:
             raise HTTPException(status_code=409, detail=http_exception_detail(msg=e._message(), type= e.__class__.__name__))
         except Exception as e:
-            raise HTTPException(status_code=500, detail=http_exception_detail(msg=e._message().split('DETAIL:  ', 1)[1], type= e.__class__.__name__))
+            raise HTTPException(status_code=500, detail=http_exception_detail(msg=f"{e}", type= e.__class__.__name__))
 
     async def delete(self, id, db:Session):
         try:
@@ -104,14 +104,14 @@ class CRUD:
             db.commit()
             return f"{rows} row(s) deleted"
         except Exception as e:
-            raise HTTPException(status_code=500, detail=http_exception_detail(msg=e._message().split('DETAIL:  ', 1)[1], type= e.__class__.__name__))
+            raise HTTPException(status_code=500, detail=http_exception_detail(msg=f"{e}", type= e.__class__.__name__))
 
     async def bk_create(self, payload, db:Session):
         try:
             db.add_all([self.model(**payload.dict()) for payload in payload])
             db.commit()
         except Exception as e:
-            raise HTTPException(status_code=500, detail=http_exception_detail(msg=e._message().split('DETAIL:  ', 1)[1], type= e.__class__.__name__))
+            raise HTTPException(status_code=500, detail=http_exception_detail(msg=f"{e}", type= e.__class__.__name__))
 
     async def bk_update(self, payload, db:Session, **kwargs):
         try:
@@ -119,7 +119,7 @@ class CRUD:
             db.commit()
             return rows
         except Exception as e:
-            raise HTTPException(status_code=500, detail=http_exception_detail(msg=e._message().split('DETAIL:  ', 1)[1], type= e.__class__.__name__))
+            raise HTTPException(status_code=500, detail=http_exception_detail(msg=f"{e}", type= e.__class__.__name__))
 
     async def bk_delete(self, ids:list, db:Session):
         try:
@@ -131,7 +131,7 @@ class CRUD:
         except MaxOccurrenceError as e:
             raise HTTPException(status_code=409, detail=http_exception_detail(msg=e._message(), type= e.__class__.__name__))
         except Exception as e:
-            raise HTTPException(status_code=500, detail=http_exception_detail(msg=e._message().split('DETAIL:  ', 1)[1], type= e.__class__.__name__))
+            raise HTTPException(status_code=500, detail=http_exception_detail(msg=f"{e}", type= e.__class__.__name__))
 
 class ContentQueryChecker:
     def __init__(self, cols=None, actions=None):

@@ -1,15 +1,11 @@
 from routers.voucher.schemas import Voucher
-from routers.meal.schemas import Meal
 from typing import Optional, List, Union
+from routers.meal.schemas import Meal
+import routers.order.models as  m
 from pydantic import BaseModel
 import datetime, enum
-import routers.order.models as  m
 
-from enum import Enum
-
-from routers.voucher.schemas import Voucher
-
-class OrderState(str, Enum):
+class OrderState(str, enum.Enum):
     active = 'active'
     completed = 'completed'
     cancelled = 'cancelled'
@@ -34,7 +30,8 @@ class UpdateOrderMeal(BaseModel):
     
 class OrderMeal(BaseModel):
     meal: Meal
-    status: OrderMealState
+    # status: Optional[str] = None
+    # status: OrderMealState
     quantity: Optional[int]
 
     class Config:
@@ -48,7 +45,7 @@ class CreateOrder(OrderBase):
     table_id: int
     voucher_id: Optional[int]
     meals: List[CreateOrderMeal]
-    restaurant_id: int
+    # restaurant_id: int
 
     class Config:
         orm_mode = True
@@ -65,11 +62,15 @@ class Order(OrderBase):
     id: int
     total: float
     currency: Union[str, None]
-    served_total: Union[float, None]
-    # created: datetime.datetime
-    # updated: datetime.datetime
-    # voucher: Optional[Voucher]
+    total: Union[float, None]
+    created: datetime.datetime
+    updated: datetime.datetime
+    # restaurant_id: Optional[int]
+    # table_restaurant: Optional[int]
+    # total_to_pay: Union[float, None]
+    voucher: Optional[Voucher]
     # meals: Optional[List[OrderMeal]]
+    # status: OrderState = OrderState.active
 
     class Config:
         orm_mode = True
