@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, String, BigInteger
 from sqlalchemy.orm import relationship
 from mixins import BaseMixin
 from database import Base
@@ -7,8 +7,8 @@ class Role(BaseMixin, Base):
     '''Role Model'''
     __tablename__ = "roles"
 
-    title = Column(String, nullable=False) # unique + restaurant_id
     description = Column(String, nullable=True)  
-    users = relationship('User', back_populates="roles", uselist=True, cascade="all, delete", lazy='dynamic')
-    permissions = 0
-    # restaurant_id
+    title = Column(String, nullable=False, unique=True)
+    permissions = Column(BigInteger, nullable=False, default=0)
+    users = relationship('User', back_populates="role", uselist=True, cascade="all, delete", lazy='dynamic')
+    # restaurant_id -> title + restaurant_id IS unique

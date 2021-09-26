@@ -36,10 +36,11 @@ class CRUD:
             db.refresh(obj) 
             return obj  
         except IntegrityError as e:
-            print(e)
             raise HTTPException(status_code=409, detail=http_exception_detail(msg=e._message().split('DETAIL:  ', 1)[1], type= e.__class__.__name__))
         except MaxOccurrenceError as e:
             raise HTTPException(status_code=409, detail=http_exception_detail(msg=e._message(), type= e.__class__.__name__))
+        except AssertionError as e:
+            raise HTTPException(status_code=400, detail=http_exception_detail(msg=f"{e}", type= e.__class__.__name__))
         except Exception as e:
             raise HTTPException(status_code=500, detail=http_exception_detail(msg=f"{e}", type= e.__class__.__name__))
         
@@ -95,6 +96,8 @@ class CRUD:
             raise HTTPException(status_code=409, detail=http_exception_detail(msg=e._message().split('DETAIL:  ', 1)[1], type= e.__class__.__name__))
         except MaxOccurrenceError as e:
             raise HTTPException(status_code=409, detail=http_exception_detail(msg=e._message(), type= e.__class__.__name__))
+        except AssertionError as e:
+            raise HTTPException(status_code=400, detail=http_exception_detail(msg=f"{e}", type= e.__class__.__name__))
         except Exception as e:
             raise HTTPException(status_code=500, detail=http_exception_detail(msg=f"{e}", type= e.__class__.__name__))
 

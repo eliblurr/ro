@@ -1,16 +1,21 @@
+from pydantic import BaseModel, validator
 from typing import Optional, List, Union
-from pydantic import BaseModel
+from utils import list_sum, type_2_pow
+from routers.users.role.schemas import Role
 import datetime
 import enum
+from pydantic.types import constr
+
+
+from . import models as m
 
 class UserTypes(str, enum.Enum):
     users = 'users'
-    admin = 'admin'
+    admins = 'admins'
     customers = 'customers'
 
 class CustomerBase(BaseModel):
     phone: str
-    full_name: str
     last_name: Optional[str]
     first_name: Optional[str]
     middle_name: Optional[str]
@@ -23,7 +28,6 @@ class CreateCustomer(CustomerBase):
     
 class UpdateCustomer(CustomerBase):
     phone: Optional[str]
-    full_name: Optional[str]
     last_name: Optional[str]
     first_name: Optional[str]
     middle_name: Optional[str]
@@ -31,6 +35,7 @@ class UpdateCustomer(CustomerBase):
     
 class Customer(CustomerBase):
     id: int
+    full_name: str
     created: datetime.datetime
     updated: datetime.datetime
 
@@ -41,16 +46,24 @@ class CustomerList(BaseModel):
 
 class AdminBase(BaseModel):
     email: str
-    password: str
     
     class Config:
         orm_mode = True
       
 class CreateAdmin(AdminBase):
-    pass
+    password: str
+    permissions: Optional[List[int]]
+
+    _check_perm_ = validator('permissions', allow_reuse=True, each_item=True)(type_2_pow)
+    _sum_perm_ = validator('permissions', allow_reuse=True)(list_sum)
     
-class UpdateAdmin(AdminBase):
-    password: Optional[str]
+class UpdateAdmin(BaseModel):
+    email: Optional[str]
+    permissions: Optional[int]
+    password: Optional[constr(min_length=6)]
+
+    class Meta:
+        model = m.Admin
     
 class Admin(AdminBase):
     id: int
@@ -63,25 +76,32 @@ class AdminList(BaseModel):
     data: List[Admin]
 
 class UserBase(BaseModel):
-    code: str
     role_id: int
     restaurant_id: int
+    code: Optional[str]
     
     class Config:
         orm_mode = True
       
 class CreateUser(UserBase):
     password: str
-    permission: Optional[int]
+    permissions: List[int]
+
+    _check_perm_ = validator('permissions', allow_reuse=True, each_item=True)(type_2_pow)
+    _sum_perm_ = validator('permissions', allow_reuse=True)(list_sum)
     
 class UpdateUser(BaseModel):
     code: Optional[str]
     role_id: Optional[int]
-    password: Optional[str]
     permission: Optional[int]
+    password: Optional[constr(min_length=6)]
+
+    class Meta:
+        model = m.User
     
 class User(UserBase):
     id: int
+    role: Role
     created: datetime.datetime
     updated: datetime.datetime
 
