@@ -10,6 +10,10 @@ from utils import gen_code
 from database import Base
 import enum
 
+class OrderTypes(enum.Enum):
+    on_table = 'on_table'
+    off_table = 'off_table'
+
 class OrderState(enum.Enum):
     active = 'active'
     completed = 'completed'

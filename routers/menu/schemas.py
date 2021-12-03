@@ -30,7 +30,7 @@ class Menu(MenuBase):
     created: datetime.datetime
     updated: datetime.datetime
     images: Optional[List[Image]]
-    meals: Optional[List[Meal]] = None
+    meals: Optional[List[Meal]] = []
 
 class MenuList(BaseModel):
     bk_size: int
