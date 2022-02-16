@@ -1,5 +1,4 @@
 from jwt.exceptions import ExpiredSignatureError, DecodeError
-from routers.users.auth.crud import is_token_blacklisted
 from utils import decode_jwt, http_exception_detail
 from fastapi import HTTPException, Depends
 from database import SessionLocal
@@ -13,6 +12,7 @@ def get_db():
         db.close()
 
 async def validate_bearer(token:str=Depends(oauth2_scheme), db=Depends(get_db)):
+    from routers.user.auth.crud import is_token_blacklisted
     try:
         if await is_token_blacklisted(token, db):
             raise HTTPException(status_code=401, detail=http_exception_detail(loc="Bearer <token>", msg="token blacklisted", type="BlacklistedToken"), headers={"WWW-Authenticate": "Bearer"})

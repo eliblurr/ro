@@ -24,7 +24,7 @@ async def read_by_id(resource_id:int, db:Session=Depends(get_db)):
 async def update(resource_id:int, payload:schemas.UpdateMenu, db:Session=Depends(get_db)):
     return await crud.menu.update(resource_id, payload, db)
 
-@router.put('/{resource_id}/meals', description='', name='Menu')
+@router.patch('/{resource_id}/meals', description='', name='Menu')
 async def add_meal_to_menu(resource_id:int, meal_ids:List[int], db:Session=Depends(get_db)):
     return await crud.add_meal_to_menu(resource_id, meal_ids, db)
 

@@ -1,11 +1,9 @@
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
-from fastapi.openapi.utils import get_openapi
+from sqlalchemy.orm import close_all_sessions
 from fastapi.staticfiles import StaticFiles
-from fastapi import FastAPI, Request
-from fastapi import BackgroundTasks
-from database import SessionLocal
 from schedulers import scheduler
+from fastapi import FastAPI
 import config as cfg
 
 app = FastAPI(
@@ -22,7 +20,7 @@ app.add_middleware(
     allow_methods = cfg.METHODS,
     allow_headers = cfg.HEADERS,)
 
-app.mount(cfg.MEDIA_URL, StaticFiles(directory=cfg.MEDIA_ROOT), name="media")
+app.mount(cfg.MEDIA_URL, StaticFiles(directory=cfg.UPLOAD_ROOT), name="upload")
 app.mount(cfg.STATIC_URL, StaticFiles(directory=cfg.STATIC_ROOT), name="static")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
@@ -32,20 +30,7 @@ async def startup_event():
 
 @app.on_event('shutdown')
 async def shutdown_event():
+    close_all_sessions()
     scheduler.shutdown()
 
 from urls import *
-from routers.currency.models import Base
-from routers.restaurant.models import Base
-from routers.location.models import Base
-from routers.meal.models import Base
-from routers.users.accounts.models import Base
-from database import engine
-
-@app.post("/init")
-def init():  
-    Base.metadata.create_all(bind=engine)
-
-@app.delete("/terminate")
-def terminate():  
-    Base.metadata.drop_all(bind=engine)

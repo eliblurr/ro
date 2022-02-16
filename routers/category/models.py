@@ -1,10 +1,10 @@
 from sqlalchemy import Column, String, Integer, ForeignKey, UniqueConstraint, event
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import relationship
-from routers.media.models import Image
-from routers.meal.models import Meal
 from mixins import BaseMixin
+from utils import today_str
 from database import Base
+from ctypes import File
 
 class Category(BaseMixin, Base):
     '''Category Model'''
@@ -15,14 +15,22 @@ class Category(BaseMixin, Base):
     metatitle = Column(String, nullable=True)
     description = Column(String, nullable=True)
     restaurant_id = Column(Integer, ForeignKey('restaurants.id'), nullable=True)
-    images = relationship('Image', uselist=True, cascade="all, delete")
-    meals = relationship('Meal', secondary='category_meals', backref='category', lazy='dynamic')
+    image = Column(File(upload_to=f'{today_str()}'), nullable=False)
+    meals = relationship('Meal', secondary='category_meals', backref='categories', lazy='dynamic')
+    menus = relationship('Menu', secondary='category_menus', backref='categories', lazy='dynamic')
 
 class CategoryMeal(Base):
     '''Category Meal Model'''
     __tablename__ = 'category_meals'
 
     meal_id = Column(Integer, ForeignKey('meals.id'), primary_key=True)
+    category_id = Column(Integer, ForeignKey('categories.id'), primary_key=True)
+
+class CategoryMenu(Base):
+    '''Category Menu Model'''
+    __tablename__ = 'category_menus'
+
+    menu_id = Column(Integer, ForeignKey('menus.id'), primary_key=True)
     category_id = Column(Integer, ForeignKey('categories.id'), primary_key=True)
 
 @event.listens_for(Category, 'before_insert')

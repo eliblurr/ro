@@ -1,12 +1,14 @@
 from typing import Optional, List
-from pydantic import BaseModel, conint
+from pydantic import BaseModel
 import datetime
 
 class TableBase(BaseModel):
+    id: int
     code: Optional[str]
       
-class CreateTable(TableBase):
+class CreateTable(BaseModel):
     restaurant_id: int
+    code: Optional[str]
     
 class UpdateTable(BaseModel):
     code: Optional[str]

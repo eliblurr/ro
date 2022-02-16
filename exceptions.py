@@ -1,8 +1,23 @@
-class UnboundTenantError(Exception):
-    pass
+class BaseException(Exception):
+    def __init__(self, message="Something went wrong"):
+        self.message = message
+        super().__init__(self.message)
 
-class TenantConflict(Exception):
-    pass
+    def _message(self):
+        return self.message
 
-class MaxOccurrenceError(Exception):
-    pass
+class UnboundTenantError(BaseException):pass
+
+class TenantConflict(BaseException):pass
+
+class MaxOccurrenceError(BaseException):pass
+
+class BlacklistedToken(BaseException):pass
+
+class FileNotSupported(BaseException):pass
+
+class UploadNotAllowed(BaseException):pass
+
+class NotFoundError(BaseException):pass
+
+class UnacceptableError(BaseException):pass

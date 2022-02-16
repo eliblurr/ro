@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, DateTime, Boolean, String, ForeignKey, Float, Index, types
+from sqlalchemy import Column, Integer, DateTime, Boolean, String, ForeignKey, Float, Index, types, Unicode
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.dialects.postgresql import TSVECTOR
 from passlib.hash import pbkdf2_sha256 as sha256
@@ -8,10 +8,21 @@ from sqlalchemy.sql import func
 from database import engine
 import datetime
 
+from ctypes import File
+
 class BaseMethodMixin(object):
     @classmethod
     def c(cls):
-        return [(c.name, c.type.python_type) if c.name!='__ts_vector__' else (c.name, None) for c in cls.__table__.columns]
+        return [
+            (c.name, c.type.python_type) for c in cls.__table__.columns if not isinstance(c.type, File)
+
+        ]
+    # @classmethod
+    # def c(cls):
+    #     return [(c.name, c.type.python_type) if c.name!='__ts_vector__' else (c.name, None) for c in cls.__table__.columns]
+    # return [
+        #     (c.name, c.type.python_type) if not isinstance(c.type, File) else (c.name, str) for c in cls.__table__.columns
+        # ]
 
 class BaseMixin(BaseMethodMixin):    
     status = Column(Boolean, default=True)
@@ -44,6 +55,21 @@ class FullTextSearchMixin(object):
                     postgresql_using='gin'
                 ),
             )
+
+# class UploadMixin(object):
+#     __abstract__ = True
+    
+#     @declared_attr
+#     def documents(cls):
+#         return 
+#         UserVote.objects.get(voter=voter, object_id=self.id)
+#         self.documents
+# Find the event we just made.
+# session.query(Event).filter_by(object=user).first()
+
+# # Find any events that are bound to users.
+# session.query(Event).filter(Event.object.is_type(User)).all()
+
 
 '''
 Working POSTGRESQL QUERY -> -- select * from currencies WHERE to_tsvector(title ||' '|| id ||' '|| status) @@ to_tsquery('true')

@@ -1,4 +1,4 @@
-from routers.media.schemas import Image
+# from routers.media.schemas import Image
 from pydantic import BaseModel, constr
 from routers.meal.schemas import Meal
 from routers.menu.schemas import Menu
@@ -39,7 +39,7 @@ class Restaurant(RestaurantBase):
     created: datetime.datetime
     updated: datetime.datetime
     meals: Optional[List[Meal]]
-    images: Optional[List[Image]]
+    # images: Optional[List[Image]]
 
     class Config:
         orm_mode = True

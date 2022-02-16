@@ -1,5 +1,5 @@
-from typing import Optional, List, Union
-from routers.media.schemas import Image
+from typing import Optional, List
+# from routers.media.schemas import Image
 from routers.meal.schemas import Meal
 from pydantic import BaseModel
 from utils import as_form
@@ -29,7 +29,7 @@ class Menu(MenuBase):
     id: int
     created: datetime.datetime
     updated: datetime.datetime
-    images: Optional[List[Image]]
+    # images: Optional[List[Image]]
     meals: Optional[List[Meal]] = []
 
 class MenuList(BaseModel):

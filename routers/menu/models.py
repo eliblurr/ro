@@ -1,9 +1,9 @@
 from sqlalchemy import Column, String, Integer, Float, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
-from routers.media.models import Image
-from routers.meal.models import Meal
 from mixins import BaseMixin
+from utils import today_str
 from database import Base
+from ctypes import File
 
 class Menu(BaseMixin, Base):
     '''Menu Model'''
@@ -14,7 +14,7 @@ class Menu(BaseMixin, Base):
     metatitle = Column(String, nullable=True)
     description = Column(String, nullable=False)
     restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
-    images = relationship('Image', uselist=True, cascade="all, delete")
+    image = Column(File(upload_to=f'{today_str()}'), nullable=False)
     meals = relationship("Meal", secondary='menu_meals', backref='menu')
 
 class MenuMeal(Base):

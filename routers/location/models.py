@@ -1,32 +1,35 @@
-from sqlalchemy import Column, String, Integer, ForeignKey
-from routers.restaurant.models import Restaurant
+from babel.numbers import get_territory_currencies, get_currency_symbol, format_currency
+from sqlalchemy import Column, Integer, Enum, DateTime
 from sqlalchemy.orm import relationship
-from ..currency.models import Currency
-from mixins import BaseMixin
+from mixins import BaseMethodMixin
+from .schemas import LocaleChoice
+from config import LANGUAGE
 from database import Base
+import datetime
 
-class Country(BaseMixin, Base):
-    __tablename__ = "countries"
-    
-    title = Column(String, nullable=False, unique=True)
-    currency = relationship('Currency', backref="countries")
-    currency_id = Column(Integer, ForeignKey("currencies.id"), nullable=False)
-    subcountry = relationship('SubCountry', back_populates="country", uselist=True, cascade="all, delete", lazy='dynamic')
+class Locale(BaseMethodMixin, Base):
+    __tablename__ = "locales"
 
-class SubCountry(BaseMixin, Base):
-    __tablename__ = "subcountries"
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    name = Column(Enum(LocaleChoice), nullable=False, unique=True)
+    restaurants = relationship('Restaurant', back_populates="locale", cascade="all, delete", lazy='dynamic')
+    created = Column(DateTime, default=datetime.datetime.utcnow)
+    ads = relationship('AD', secondary='ad_locales', back_populates="locales", lazy='dynamic')
 
-    title = Column(String, nullable=False, unique=True)
-    postcode = Column(String, nullable=True, unique=True)
-    country_id = Column(Integer, ForeignKey('countries.id'))
-    country = relationship('Country', back_populates="subcountry")
-    cities = relationship('City', back_populates="subcountry", uselist=True, cascade="all, delete", lazy='dynamic')
+    def get_currency(self):
+        currency = get_territory_currencies(self.name, start_date=datetime.date.today())
+        if currency:
+            return currency[0]
+        return None
 
-class City(BaseMixin, Base):
-    __tablename__ = "cities"
+    def get_currency_symbol(self):
+        currency = self.get_currency()
+        if currency:
+            return get_currency_symbol(currency, locale=f'{LANGUAGE}_{self.name}')
+        return None
 
-    title = Column(String, nullable=False, unique=True)
-    postcode = Column(String, nullable=True, unique=False)
-    subcountry_id = Column(Integer, ForeignKey('subcountries.id'))
-    subcountry = relationship('SubCountry', back_populates="cities")
-    restaurants = relationship('Restaurant', back_populates="city", cascade="all, delete", lazy='dynamic')
+    def format_currency(self, value:float):
+        currency = self.get_currency()
+        if currency:
+            return format_currency(value, currency, locale=f'{LANGUAGE}_{self.name}')
+        return value

@@ -9,4 +9,4 @@ class FAQ(BaseMixin, Base):
     title = Column(String, nullable=False)
     metatitle = Column(String, nullable=True)
     description = Column(String, nullable=False)
-    pos_index = Column(Integer, autoincrement=True, nullable=False, unique=True, index=True)
+    index = Column(Integer, autoincrement=True, nullable=False, unique=True, index=True)

@@ -1,8 +1,14 @@
-from routers.media.schemas import Image
-from typing import Optional, List
+from typing import Optional, List, Union
 from pydantic import BaseModel
 from utils import as_form
 import datetime
+
+class ADLocale(BaseModel):
+    ad_id:int
+    locale_id:int
+
+    class Config:
+        orm_mode = True
 
 class ADBase(BaseModel):
     title: Optional[str]
@@ -11,17 +17,15 @@ class ADBase(BaseModel):
     status: Optional[bool]
 
 @as_form
-class CreateAD(ADBase):
-    pass
+class CreateAD(ADBase):pass
     
-class UpdateAD(ADBase):
-    pass
+class UpdateAD(ADBase):pass
     
 class AD(ADBase):
     id: int
+    image:Optional[str]
     created: datetime.datetime
     updated: datetime.datetime
-    images: Optional[List[Image]]
 
     class Config:
         orm_mode = True
@@ -29,4 +33,4 @@ class AD(ADBase):
 class ADList(BaseModel):
     bk_size: int
     pg_size: int
-    data: List[AD]
+    data: Union[List[AD], list]

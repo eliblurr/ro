@@ -6,7 +6,7 @@ class PolicyBase(BaseModel):
     title: str
     description: str
     status: Optional[bool]
-    pos_index: conint(gt=0)
+    index: conint(gt=0)
     metatitle: Optional[str]
     
 class CreatePolicy(PolicyBase):
@@ -17,7 +17,7 @@ class UpdatePolicy(BaseModel):
     status: Optional[bool]
     metatitle: Optional[str]
     description: Optional[str]
-    pos_index: Optional[conint(gt=0)]
+    index: Optional[conint(gt=0)]
 
 class Policy(PolicyBase):
     id: int

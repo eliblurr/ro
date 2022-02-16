@@ -1,8 +1,7 @@
-from routers.media.schemas import Image
 from typing import Optional, List
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from utils import as_form
-import datetime
+import datetime, enum
 
 class CategoryBase(BaseModel):
     title: str
@@ -23,9 +22,9 @@ class UpdateCategory(BaseModel):
     
 class Category(CategoryBase):
     id: int
+    image: Optional[str]
     created: datetime.datetime
     updated: datetime.datetime
-    images: Optional[List[Image]]
 
     class Config:
         orm_mode = True
@@ -34,3 +33,22 @@ class CategoryList(BaseModel):
     bk_size: int
     pg_size: int
     data: List[Category]
+
+class RelatedResource(str, enum.Enum):
+    meals = 'meals'
+    menus = 'menus'
+
+class CategoryMeal(BaseModel):
+    meal_id:int
+    category_id:int
+    meal_id:int = Field(..., gt=0, alias='c_id')
+
+    class Config:
+        orm_mode = True
+
+class CategoryMenu(BaseModel):
+    category_id:int
+    menu_id:int = Field(..., gt=0, alias='c_id')
+
+    class Config:
+        orm_mode = True

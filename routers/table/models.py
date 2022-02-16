@@ -10,6 +10,6 @@ class Table(BaseMixin, Base):
     __table_args__ = (UniqueConstraint('code', 'restaurant_id', name='uix_code_restaurant_fk'),)
 
     orders = relationship("Order", back_populates="table")
-    restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
+    restaurant_id = Column(Integer, ForeignKey('restaurants.id'), nullable=False)
     restaurant = relationship("Restaurant", back_populates="tables")
-    code = Column(String, unique=True, nullable=False, default=gen_code) 
+    code = Column(String, nullable=False, default=gen_code) 

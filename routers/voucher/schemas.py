@@ -1,5 +1,6 @@
+from pydantic import BaseModel, validator, ValidationError
 from typing import Optional, List
-from pydantic import BaseModel
+from .models import Voucher
 import datetime, enum
 
 class VoucherState(str, enum.Enum):
@@ -9,20 +10,28 @@ class VoucherState(str, enum.Enum):
 
 class VoucherBase(BaseModel):
     discount: float
+    expiry: Optional[float]
+    qualified_amount: Optional[float]
 
-import routers.order.models as  m
+    @validator('qualified_amount')
+    def qualified_amount_gte_discount(cls, v, values, **kwargs):
+        if v:
+            assert v>=values['discount'], 'qualified_amount must be greater or equal to discount'
+        return v
 
 class CreateVoucher(VoucherBase):
     restaurant_id: Optional[int]
 
     class Meta:
-        model = m.Voucher
+        model = Voucher
     
-class UpdateVoucher(BaseModel):
+class UpdateVoucher(VoucherBase):
     order_id: Optional[int]
     discount: Optional[float]
     restaurant_id: Optional[int]
     status: Optional[VoucherState]
+    qualified_amount: Optional[float]
+    expiry: Optional[float]
 
 class Voucher(VoucherBase):
     id: int
@@ -34,7 +43,7 @@ class Voucher(VoucherBase):
         orm_mode = True
 
     class Meta:
-        model = m.Voucher
+        model = Voucher
 
 class VoucherList(BaseModel):
     bk_size: int

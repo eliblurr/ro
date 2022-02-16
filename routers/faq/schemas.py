@@ -5,8 +5,8 @@ import datetime
 class FAQBase(BaseModel):
     title: str
     description: str
+    index: conint(gt=0)
     status: Optional[bool]
-    pos_index: conint(gt=0)
     metatitle: Optional[str]
       
 class CreateFAQ(FAQBase):
@@ -17,7 +17,7 @@ class UpdateFAQ(BaseModel):
     status: Optional[bool]
     metatitle: Optional[str]
     description: Optional[str]
-    pos_index: Optional[conint(gt=0)]
+    index: Optional[conint(gt=0)]
     
 class FAQ(FAQBase):
     id: int

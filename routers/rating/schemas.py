@@ -3,6 +3,7 @@ from typing import Optional, List
 import datetime
 
 class RatingBase(BaseModel):
+    id: int
     title: Optional[str]
     description: Optional[str]
     rating: confloat(ge=0, le=5)

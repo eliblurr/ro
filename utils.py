@@ -1,12 +1,13 @@
+from datetime import timedelta, datetime, date
+import inspect, secrets, os, shutil, logging
 from config import JWT_ALGORITHM, settings
-from datetime import timedelta, datetime
 from math import ceil, floor, log2
 from typing import Optional
-import inspect, secrets, os
 from fastapi import Form
 import sqlalchemy as sa
 from io import BytesIO
 from PIL import Image
+today = date.today()
 
 def to_tsvector(lang='pg_catalog.english', *columns):
     s = " || ' ' || ".join(columns)
@@ -84,9 +85,8 @@ def type_2_pow(n):
 def list_sum(ls):
     return sum(ls)
 
-def create_jwt(data:dict, expires_delta:Optional[timedelta]=None):
-    expire = datetime.utcnow() + expires_delta if expires_delta else datetime.utcnow() + timedelta(minutes=settings.ACCESS_SESSION_DURATION_IN_MINUTES)
-    data.update({"exp": expire})
+def create_jwt(data:dict, exp:timedelta=None):
+    data.update({"exp": datetime.utcnow()+exp if exp else datetime.utcnow()+timedelta(minutes=settings.ACCESS_SESSION_DURATION_IN_MINUTES)})
     return jwt.encode(data, settings.SECRET_KEY, algorithm=JWT_ALGORITHM)
 
 def decode_jwt(jwt:str):
@@ -94,3 +94,32 @@ def decode_jwt(jwt:str):
 
 def str_to_datetime(string, frmt='%Y-%m-%d %H:%M:%S'):
     return datetime.strptime(string, frmt)
+
+def db_url():
+    '''
+        current version of sqlalchemy does not support [postgres]:// 
+        hence change to postgresql to accomodate
+    '''
+
+    db_url = settings.DATABASE_URL
+    if db_url.split(':', 1)[0] in ['postgres']:
+        db_url = 'postgresql:'+db_url.split(':', 1)[1]
+    return db_url
+
+def delete_path(path):
+    try:
+        if os.path.isfile(path):
+            os.remove(path)
+        elif os.path.isdir(path):
+            shutil.rmtree(path)
+    except OSError as e:
+        logger = logging.getLogger("eAsset.main")
+        logger.error("Error: %s - %s." % (e.filename, e.strerror))
+
+today_str =  lambda: today.strftime("%Y-%m-%d")
+
+# from routers.user.auth.crud import is_token_blacklisted
+# from sqlalchemy.orm import Session
+# async def is_token_blacklisted(token:str, db:Session):
+#     return await is_token_blacklisted(token, db)
+    # db.query(models.RevokedToken.id).filter_by(jti=token).first() is not None

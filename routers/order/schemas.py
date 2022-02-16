@@ -3,58 +3,61 @@ from typing import Optional, List, Union
 from routers.table.schemas import Table
 from routers.meal.schemas import Meal
 import routers.order.models as  m
-from pydantic import BaseModel
+from pydantic import BaseModel, conint, validator
 import datetime, enum
 
-class OrderState(str, enum.Enum):
-    active = 'active'
-    completed = 'completed'
-    cancelled = 'cancelled'
-
-class OrderMealState(str, enum.Enum):
-    ready = 'ready'
-    served = 'served'
-    pending = 'pending'
-    preparing = 'preparing'
-
-class CreateOrderMeal(BaseModel):
+class OrderMealBase(BaseModel):
     meal_id: int
-    quantity: int
-    order_id: Optional[int]
-
     class Meta:
         model = m.OrderMeal
 
+class CreateOrderMeal(OrderMealBase):
+    quantity: conint(ge=1) = 1 # use to iterate over number of order meals to create with given id
+    order_id: Optional[int]
+
 class UpdateOrderMeal(BaseModel):
-    quantity: Optional[int]
-    status: Optional[OrderMealState]
-    
+    order_id: Optional[int]
+    status: Optional[m.OrderMealState]
+    class Meta:
+        model = m.OrderMeal
+
+class UpdateOrCreateOrderMeal(OrderMealBase):
+    meal_id:Optional[int]=0
+    quantity: Optional[conint(ge=1)]
+    status: Optional[m.OrderMealState]
+
 class OrderMeal(BaseModel):
     id:int
     meal: Meal
-    status: enum.Enum
-    quantity: Optional[int]
+    status: m.OrderMealState
 
     class Config:
         orm_mode = True
 
 class OrderBase(BaseModel):
-    status: Optional[enum.Enum]
-
     class Meta:
         model = m.Order
 
 class CreateOrder(OrderBase):
-    table_id: int
+    table_id: Optional[int]
     voucher_id: Optional[int]
-    meals: List[CreateOrderMeal]
+    restaurant_id:Optional[int]
+    meals: List[UpdateOrCreateOrderMeal]
 
     class Config:
         orm_mode = True
 
-class UpdateOrder(BaseModel):
-    table_id: Optional[int]
+    @validator('restaurant_id')
+    def passwords_match(cls, v, values, **kwargs):
+        if values['table_id']:
+            return None
+        if not(v) and not(values['table_id']):
+            raise ValueError('table_id and restaurant_id cannot both be empty')
+        return v
+
+class UpdateOrder(OrderBase):
     voucher_id: Optional[int]
+    status: Optional[m.OrderState]
     meals: Optional[List[CreateOrderMeal]]
 
     class Meta:
@@ -62,17 +65,17 @@ class UpdateOrder(BaseModel):
 
 class Order(OrderBase):
     id: int
-    total: float
-    table: Table
     order_code: str
-    status: enum.Enum 
-    total: Union[float, None]
-    currency: Union[str, None]
+    restaurant_id: int
+    status: m.OrderState
+    table: Optional[Table]
     voucher: Optional[Voucher]
-    created: datetime.datetime
-    updated: datetime.datetime
+    meals: List[OrderMeal] = []
     amount_paid: Optional[float]
-    meals: Optional[List[OrderMeal]]
+    formatted_total: str
+    currency_symbol: str
+    currency: str
+    total: float
     
     class Config:
         orm_mode = True
