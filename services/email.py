@@ -1,8 +1,8 @@
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
-from pydantic import EmailStr, BaseModel
-from fastapi import UploadFile, File
-from typing import List, Optional
-from config import settings
+from pydantic import EmailStr, BaseModel, validator
+from typing import List, Optional, Union
+from config import settings, BASE_DIR
+import os
 
 fm = FastMail(
     ConnectionConfig(
@@ -15,24 +15,32 @@ fm = FastMail(
         MAIL_TLS = settings.MAIL_TLS,
         MAIL_SSL = settings.MAIL_SSL,
         USE_CREDENTIALS = settings.USE_CREDENTIALS,
-        VALIDATE_CERTS = settings.VALIDATE_CERTS
+        VALIDATE_CERTS = settings.VALIDATE_CERTS,
+        TEMPLATE_FOLDER = os.path.join(BASE_DIR, 'static/templates')
     )
 )
 
 class Mail(BaseModel):
     subject: Optional[str] = settings.DEFAULT_MAIL_SUBJECT
+    template_name:Optional[str]
     recipients: List[EmailStr]
-    body: str
-    
-async def email(mail, *args, **kwargs):
+    body: Union[str, dict]
+
+    @validator('body')
+    def verify_template_name(cls, v, values):
+        if isinstance(v, dict) and not values["template_name"]:
+            raise ValueError('body should be of type dict')
+        return v
+        
+async def email(mail:Union[Mail, dict], *args, **kwargs):
+    mail = Mail.parse_obj(mail) if isinstance(mail, dict) else mail
     message = MessageSchema(
         subject=mail.subject,
         recipients=mail.recipients, 
-        body=mail.body,
         attachments=kwargs.get('attachments', []),
-        subtype="html"
     )
-    await fm.send_message(message)
-
-async def bg_email(background_tasks, mail, *args, **kwargs):
-    background_tasks.add_task(email, mail, *args, **kwargs)
+    if mail.template_name:
+        message.template_body = mail.dict().get("body")
+    else:
+        message.body, message.subtype  = mail.body, "html"
+    await fm.send_message(message, template_name=mail.template_name)

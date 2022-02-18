@@ -5,12 +5,6 @@ from enum import Enum
 import datetime
 from .models import UploadType
 
-# class UploadType(str, Enum):
-#     audio='audio'
-#     video='video'
-#     image='image'
-#     document='document'
-
 class UploadBase(BaseModel):
     url: str
     upload_type: Optional[UploadType]
@@ -31,15 +25,15 @@ class UploadList(BaseModel):
 
 # from routers import Meal as m
 # print(Meal)
-objects = {
-    # 'policies':Policy,
-    'meals': 'Meal'
-}
-# from routers.meal.models import Meal
+# objects = {
+#     # 'policies':Policy,
+#     'meals': 'Meal'
+# }
+# # from routers.meal.models import Meal
 
-Object = Enum('Object', {
-    v:v for v in objects.keys()
-})
+# Object = Enum('Object', {
+#     v:v for v in objects.keys()
+# })
 
 # from config import UPLOAD_EXTENSIONS
 

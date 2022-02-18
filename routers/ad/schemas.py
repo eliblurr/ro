@@ -18,7 +18,8 @@ class ADBase(BaseModel):
 
 @as_form
 class CreateAD(ADBase):pass
-    
+
+@as_form
 class UpdateAD(ADBase):pass
     
 class AD(ADBase):

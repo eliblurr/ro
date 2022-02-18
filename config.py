@@ -70,7 +70,7 @@ class Settings(BaseSettings):
     VALIDATE_CERTS: bool = True
     DEFAULT_MAIL_SUBJECT: str = "SOME DEFAULT SUBJECT HERE"
 
-    USE_S3: bool = False
+    USE_S3: bool = True
     APS_COALESCE: bool = False
     APS_MAX_INSTANCES: int = 20
     APS_MISFIRE_GRACE_TIME: int = 4
@@ -81,6 +81,13 @@ class Settings(BaseSettings):
     AWS_DEFAULT_ACL: str = "public-read"
     AWS_STORAGE_BUCKET_NAME: str = "asset-dev-1990"
     AWS_S3_OBJECT_CACHE_CONTROL: str = "max-age=86400"
+
+    REDIS_HOST:str = "127.0.0.1"
+    REDIS_PORT:str = "6379"
+    REDIS_PASSWORD:str = ""
+    REDIS_USER:str = ""
+    REDIS_NODE:str = "0"
+    REDIS_URL:str=f"redis://{REDIS_USER}@{REDIS_PASSWORD}:{REDIS_HOST}/{REDIS_PORT}/{REDIS_NODE}"
 
     class Config:
         env_file = ".env"

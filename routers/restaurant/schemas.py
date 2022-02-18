@@ -5,7 +5,7 @@ from routers.menu.schemas import Menu
 from constants import PHONE, EMAIL
 from typing import Optional, List
 from utils import as_form
-import datetime
+import datetime, enum
 
 class RestaurantBase(BaseModel):
     title: str
@@ -36,11 +36,11 @@ class UpdateRestaurant(BaseModel):
 
 class Restaurant(RestaurantBase):
     id: int
+    images: List[str] = []
     created: datetime.datetime
     updated: datetime.datetime
     meals: Optional[List[Meal]]
-    # images: Optional[List[Image]]
-
+    
     class Config:
         orm_mode = True
 
@@ -48,3 +48,9 @@ class RestaurantList(BaseModel):
     bk_size: int
     pg_size: int
     data: List[Restaurant]
+
+class Uploads(str, enum.Enum):
+    audio='audio'
+    videos='videos'
+    images='images'
+    documents='documents'

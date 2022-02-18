@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends, File, UploadFile, Request
 from cls import ContentQueryChecker
+from routers.meal.crud import meal
+from routers.menu.crud import menu
 from sqlalchemy.orm import Session
 from dependencies import get_db
 from typing import List, Union
@@ -21,9 +23,19 @@ async def read(db:Session=Depends(get_db), **params):
 async def read_by_id(resource_id:int, db:Session=Depends(get_db)):
     return await crud.category.read_by_id(resource_id, db)
 
+@router.get('/{resource_id}/meals', description='', name='Category')
+@ContentQueryChecker(meal.model.c(), None)
+async def read(resource_id:int, db:Session=Depends(get_db), **params):
+    return await crud.category.read(params, db, related_name='meals', resource_id=resource_id)
+
+@router.get('/{resource_id}/menus', description='', name='Category')
+@ContentQueryChecker(menu.model.c(), None)
+async def read(resource_id:int, db:Session=Depends(get_db), **params):
+    return await crud.category.read(params, db, related_name='menus', resource_id=resource_id)
+
 @router.patch('/{resource_id}', description='', response_model=schemas.Category, name='Category')
-async def update(resource_id:int, payload:schemas.UpdateCategory, db:Session=Depends(get_db)):
-    return await crud.category.update(resource_id, payload, db)
+async def update(resource_id:int, payload:schemas.UpdateCategory=Depends(schemas.UpdateCategory.as_form), image:UploadFile=File(None), db:Session=Depends(get_db)):
+    return await crud.category.update_2(resource_id, payload, db, image=image)
 
 @router.put('/{cat_id}/remove-{resource}', description='', name='Category')
 @router.put('/{cat_id}/append-{resource}', description='', name='Category')
@@ -34,4 +46,4 @@ async def update(cat_id:int, resource:schemas.RelatedResource, resource_ids:List
     
 @router.delete('/{resource_id}', description='', name='Category')
 async def delete(resource_id:int, db:Session=Depends(get_db)):
-    return await crud.category.delete(resource_id, db)
+    return await crud.category.delete_2(resource_id, db)

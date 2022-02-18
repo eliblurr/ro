@@ -5,6 +5,7 @@ from sqlalchemy.orm.relationships import RelationshipProperty
 from inspect import Parameter, Signature, signature
 import re, datetime, shutil, os, enum, pathlib, os
 from fastapi import Query, Depends, HTTPException
+from redis_queue.tasks import async_s3_upload
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import and_, or_, func
 from services.aws import s3_upload
@@ -30,13 +31,13 @@ class CRUD:
             db.refresh(obj) 
             return obj  
         except IntegrityError as e:
-            # raise HTTPException(status_code=409, detail=http_exception_detail(msg=e._message().split('DETAIL:  ', 1)[1], type= e.__class__.__name__))
             raise HTTPException(status_code=409, detail=http_exception_detail(msg=e._message(), type= e.__class__.__name__))
         except MaxOccurrenceError as e:
             raise HTTPException(status_code=409, detail=http_exception_detail(msg=e._message(), type= e.__class__.__name__))
         except AssertionError as e:
             raise HTTPException(status_code=400, detail=http_exception_detail(msg=f"{e}", type= e.__class__.__name__))
         except Exception as e:
+            print(e)
             raise HTTPException(status_code=500, detail=http_exception_detail(msg=f"{e}", type= e.__class__.__name__))
         
     async def read_by_id(self, id, db:Session):
@@ -72,20 +73,27 @@ class CRUD:
                 base = base.order_by(*sort)
             
             if params['q']:
+                
                 q_or, fts = [], []
                 [ q_or.append(item) if re.search(Q_STR_X, item) else fts.append(item) for item in params['q'] ]
-                q_or = or_(*[getattr(model_to_filter, q.split(':')[0]).match(q.split(':')[1]) if q.split(':')[1]!='null' else getattr(model_to_filter, q.split(':')[0])==None for q in q_or])
-                fts = or_(*[getattr(model_to_filter, col[0]).ilike(f'%{val}%') for col in model_to_filter.c() if col[1]==str for val in fts])
+
+                if db.bind.dialect.name=='sqlite':
+                    q_or = or_(*[])
+                else:
+                    q_or = or_(*[getattr(model_to_filter, q.split(':')[0]).match(q.split(':')[1]) if q.split(':')[1]!='null' else getattr(model_to_filter, q.split(':')[0])==None for q in q_or])                
                 
+                fts = or_(*[getattr(model_to_filter, col[0]).ilike(f'%{val}%') for col in model_to_filter.c() if any((col[1]==str, issubclass(col[1], enum.Enum))) for val in fts])
                 base = base.filter(fts).filter(q_or)
             data = base.offset(params['offset']).limit(params['limit']).all()
             return {'bk_size':base.count(), 'pg_size':data.__len__(), 'data':data}
         except Exception as e:
             raise HTTPException(status_code=500, detail=http_exception_detail(msg=f"{e}", type= e.__class__.__name__))
             
-    async def update(self, id, payload, db:Session, images=None):
+    async def update(self, id, payload, db:Session, **kwargs):
         try:
-            rows = db.query(self.model).filter(self.model.id==id).update(schema_to_model(payload, True), synchronize_session="fetch")
+            data = schema_to_model(payload, exclude_unset=True)
+            data.update({k:v for k,v in kwargs.items() if v is not None})
+            db.query(self.model).filter(self.model.id==id).update(data, synchronize_session="fetch")
             db.commit()
             return await self.read_by_id(id, db)
         except IntegrityError as e:
@@ -97,11 +105,41 @@ class CRUD:
         except Exception as e:
             raise HTTPException(status_code=500, detail=http_exception_detail(msg=f"{e}", type= e.__class__.__name__))
 
-    async def delete(self, id, db:Session, filter_key:str=None):
+    async def update_2(self, id, payload, db:Session, **kwargs):
         try:
-            rows=db.query(self.model).filter(self.model.id==id).delete(synchronize_session=False)
+            obj = await self.read_by_id(id, db)
+            data = schema_to_model(payload, exclude_unset=True)
+            data.update({k:v for k,v in kwargs.items() if v is not None})
+            [setattr(obj, k, v) for k, v in data.items()]
+            db.commit()
+            db.refresh(obj)
+            return obj
+        except IntegrityError as e:
+            raise HTTPException(status_code=409, detail=http_exception_detail(msg=e._message().split('DETAIL:  ', 1)[1], type= e.__class__.__name__))
+        except MaxOccurrenceError as e:
+            raise HTTPException(status_code=409, detail=http_exception_detail(msg=e._message(), type= e.__class__.__name__))
+        except AssertionError as e:
+            raise HTTPException(status_code=400, detail=http_exception_detail(msg=f"{e}", type= e.__class__.__name__))
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=http_exception_detail(msg=f"{e}", type= e.__class__.__name__))
+
+    async def delete(self, id, db:Session, use_field:str=None):
+        try:
+            subq = getattr(self.model, use_field)==use_field if use_field else self.model.id==id
+            rows=db.query(self.model).filter(subq).delete(synchronize_session=False)
             db.commit()
             return f"{rows} row(s) deleted"
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=http_exception_detail(msg=f"{e}", type= e.__class__.__name__))
+
+    async def delete_2(self, id, db:Session, use_field:str=None):
+        try:
+            obj = await self.read_by_id(id, db)
+            if not obj: return "object does not exist"
+            subq = getattr(self.model, use_field)==use_field if use_field else self.model.id==id
+            rows=db.delete(obj)
+            db.commit()
+            return f"1 row(s) deleted"
         except Exception as e:
             raise HTTPException(status_code=500, detail=http_exception_detail(msg=f"{e}", type= e.__class__.__name__))
 
@@ -264,7 +302,7 @@ class Upload:
     def save(self, *args, **kwargs):
         if cfg.settings.USE_S3:
             url = '/'+os.path.relpath(self._url(), cfg.BASE_DIR) 
-            s3_upload(self.file, object_name=url) # push to celery to upload
+            async_s3_upload(self.file, object_name=url[1:]) # push to celery to upload
         else:
             if self.file:
                 url = self._image() if self.file.content_type.split("/")[0]=="image" else self._save_file()

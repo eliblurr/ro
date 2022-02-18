@@ -8,8 +8,8 @@ from typing import List
 router = APIRouter()
 
 @router.post('/', description='', response_model=schemas.Restaurant, status_code=201, name='Restaurant')
-async def create(payload:schemas.CreateRestaurant=Depends(schemas.CreateRestaurant.as_form), images:List[UploadFile]=File(None), db:Session=Depends(get_db)):
-    return await crud.restaurant.create(payload, db, images)
+async def create(payload:schemas.CreateRestaurant=Depends(schemas.CreateRestaurant.as_form), db:Session=Depends(get_db)):
+    return await crud.restaurant.create(payload, db)
 
 @router.get('/', description='', response_model=schemas.RestaurantList, name='Restaurant')
 @ContentQueryChecker(crud.restaurant.model.c(), None)
@@ -27,3 +27,7 @@ async def update(resource_id:int, payload:schemas.UpdateRestaurant, db:Session=D
 @router.delete('/{resource_id}', description='', name='Restaurant')
 async def delete(resource_id:int, db:Session=Depends(get_db)):
     return await crud.restaurant.delete(resource_id, db)
+
+@router.get('/{resource_id}/{upload}', description='', name='Restaurant')
+async def read(resource_id:int, upload:schemas.Uploads, offset:int=0, limit:int=100, db:Session=Depends(get_db)):
+    return await crud.get_uploads(resource_id, upload, offset, limit, db)

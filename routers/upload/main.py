@@ -10,7 +10,7 @@ import pathlib
 
 router = APIRouter()
 
-def verify_ext(upload_type:schemas.UploadType, files:List[UploadFile]=File(None)):
+def verify_ext(upload_type:schemas.UploadType, files:List[UploadFile]=File(...)):
     try:
         for file in files:
             assert pathlib.Path(file.filename).suffix in UPLOAD_EXTENSIONS[upload_type.value.upper()], f"unsupported format for {upload_type.value.upper()}"

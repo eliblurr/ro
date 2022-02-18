@@ -1,10 +1,12 @@
-from sqlalchemy import Column, String, Integer, Float, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, String, Integer, Float, ForeignKey, UniqueConstraint, event
 from sqlalchemy.ext.hybrid import hybrid_property
-from routers.upload.models import UploadProxy
+from utils import today_str, async_remove_file
 from routers.rating.models import Rating
 from sqlalchemy.orm import relationship
 from mixins import BaseMixin
 from database import Base
+from ctypes import File
+from routers.upload.models import UploadProxy
 
 class Meal(BaseMixin, UploadProxy, Base):
     '''Meal Model'''
@@ -18,6 +20,7 @@ class Meal(BaseMixin, UploadProxy, Base):
     restaurant_id = Column(Integer, ForeignKey('restaurants.id'), nullable=False)
     restaurant = relationship('Restaurant', back_populates="meals")
     ratings = relationship('Rating', uselist=True, cascade="all, delete")
+    image = Column(File(upload_to=f'{today_str()}'), nullable=False)
 
     @hybrid_property
     def currency(self):
@@ -37,3 +40,10 @@ class Meal(BaseMixin, UploadProxy, Base):
         if ratings:return sum(ratings)/ratings.__len__()
         else:return 'no ratings'
 
+@event.listens_for(Meal, 'after_delete')
+def receive_after_delete(mapper, connection, target):
+    if target.image:async_remove_file(target.image)
+
+@event.listens_for(Meal.image, 'set', propagate=True)
+def receive_set(target, value, oldvalue, initiator):
+    if oldvalue:async_remove_file(oldvalue)

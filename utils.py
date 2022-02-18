@@ -2,9 +2,10 @@ from datetime import timedelta, datetime, date
 import inspect, secrets, os, shutil, logging
 from config import JWT_ALGORITHM, settings
 from math import ceil, floor, log2
+from config import UPLOAD_ROOT
+import sqlalchemy as sa, re
 from typing import Optional
 from fastapi import Form
-import sqlalchemy as sa
 from io import BytesIO
 from PIL import Image
 today = date.today()
@@ -117,6 +118,15 @@ def delete_path(path):
         logger.error("Error: %s - %s." % (e.filename, e.strerror))
 
 today_str =  lambda: today.strftime("%Y-%m-%d")
+
+from redis_queue.tasks import async_s3_delete, async_delete_path
+
+def async_remove_file(url):
+    if isinstance(url, str):
+        if re.search(r'(s3.amazonaws.com)', url):
+            async_s3_delete(url.split('s3.amazonaws.com/')[1]) 
+        else:
+            async_delete_path(f'{UPLOAD_ROOT}{url.split("/media")[1]}')
 
 # from routers.user.auth.crud import is_token_blacklisted
 # from sqlalchemy.orm import Session

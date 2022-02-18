@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, Integer, ForeignKey, UniqueConstraint, event
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import relationship
+from utils import async_remove_file
 from mixins import BaseMixin
 from utils import today_str
 from database import Base
@@ -32,6 +33,14 @@ class CategoryMenu(Base):
 
     menu_id = Column(Integer, ForeignKey('menus.id'), primary_key=True)
     category_id = Column(Integer, ForeignKey('categories.id'), primary_key=True)
+
+@event.listens_for(Category, 'after_delete')
+def receive_after_delete(mapper, connection, target):
+    if target.image:async_remove_file(target.image)
+
+@event.listens_for(Category.image, 'set', propagate=True)
+def receive_set(target, value, oldvalue, initiator):
+    if oldvalue:async_remove_file(oldvalue)
 
 @event.listens_for(Category, 'before_insert')
 def verify_target_title(mapper, connection, target):

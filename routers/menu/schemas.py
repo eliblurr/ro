@@ -18,6 +18,7 @@ class MenuBase(BaseModel):
 class CreateMenu(MenuBase):
     restaurant_id: int
 
+@as_form
 class UpdateMenu(BaseModel):
     title: str
     description: str
@@ -27,12 +28,19 @@ class UpdateMenu(BaseModel):
 
 class Menu(MenuBase):
     id: int
+    image: Optional[str]
     created: datetime.datetime
     updated: datetime.datetime
-    # images: Optional[List[Image]]
     meals: Optional[List[Meal]] = []
 
 class MenuList(BaseModel):
     bk_size: int
     pg_size: int
     data: List[Menu]
+
+class MenuMeal(BaseModel):
+    menu_id:int
+    meal_id:int
+
+    class Config:
+        orm_mode=True

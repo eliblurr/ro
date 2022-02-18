@@ -1,5 +1,6 @@
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
+from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import close_all_sessions
 from fastapi.staticfiles import StaticFiles
 from schedulers import scheduler
@@ -23,6 +24,7 @@ app.add_middleware(
 app.mount(cfg.MEDIA_URL, StaticFiles(directory=cfg.UPLOAD_ROOT), name="upload")
 app.mount(cfg.STATIC_URL, StaticFiles(directory=cfg.STATIC_ROOT), name="static")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
+templates = Jinja2Templates(directory="static/templates")
 
 @app.on_event('startup')
 async def startup_event():
@@ -34,3 +36,9 @@ async def shutdown_event():
     scheduler.shutdown()
 
 from urls import *
+
+from redis_queue.worker import run_workers
+# import redis_queue.dummy
+
+# run_workers()
+# try

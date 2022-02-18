@@ -1,7 +1,7 @@
-from sqlalchemy import Column, String, Integer, Float, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, String, Integer, Float, ForeignKey, UniqueConstraint, event
+from utils import today_str, async_remove_file
 from sqlalchemy.orm import relationship
 from mixins import BaseMixin
-from utils import today_str
 from database import Base
 from ctypes import File
 
@@ -22,3 +22,11 @@ class MenuMeal(Base):
 
     menu_id = Column(Integer, ForeignKey('menus.id'), primary_key=True)
     meal_id = Column(Integer, ForeignKey('meals.id'), primary_key=True)
+
+@event.listens_for(Menu, 'after_delete')
+def receive_after_delete(mapper, connection, target):
+    if target.image:async_remove_file(target.image)
+
+@event.listens_for(Menu.image, 'set', propagate=True)
+def receive_set(target, value, oldvalue, initiator):
+    if oldvalue:async_remove_file(oldvalue)

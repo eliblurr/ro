@@ -13,7 +13,7 @@ async def create(payload:schemas.LocaleChoice, db:Session=Depends(get_db)):
     payload = schemas.AddLocale(name=payload.name)
     return await crud.locale.create(payload, db)
 
-@router.get('/locales', description='', status_code=201, name='Locale')
+@router.get('/locales', description='', status_code=200, name='Locale')
 @ContentQueryChecker(crud.locale.model.c(), None)
 async def read(moderate:bool=False, db:Session=Depends(get_db), **params):
     data = ['GH']

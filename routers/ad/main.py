@@ -22,9 +22,14 @@ async def read(db:Session=Depends(get_db), **params):
 async def read_by_id(resource_id:int, db:Session=Depends(get_db)):
     return await crud.ad.read_by_id(resource_id, db)
 
+@router.get('/{resource_id}/locales', description='', name='AD')
+@ContentQueryChecker(locale.model.c(), None)
+async def read(resource_id:int, db:Session=Depends(get_db), **params):
+    return await crud.ad.read(params, db, related_name='locales', resource_id=resource_id)
+
 @router.patch('/{resource_id}', description='', response_model=schemas.AD, name='AD')
-async def update(resource_id:int, payload:schemas.UpdateAD, db:Session=Depends(get_db)):
-    return await crud.ad.update(resource_id, payload, db)
+async def update(resource_id:int, payload:schemas.UpdateAD=Depends(schemas.UpdateAD.as_form), image:UploadFile=File(None), db:Session=Depends(get_db)):
+    return await crud.ad.update_2(resource_id, payload, db, image=image)
 
 @router.put('/{ad_id}/remove-locales', description='', name='AD')
 @router.put('/{ad_id}/append-locales', description='', response_model=Union[List[schemas.ADLocale], None], name='AD')
@@ -35,9 +40,4 @@ async def update(ad_id:int, locale_ids:List[int], request:Request, db:Session=De
 
 @router.delete('/{resource_id}', description='', name='AD')
 async def delete(resource_id:int, db:Session=Depends(get_db)):
-    return await crud.ad.delete(resource_id, db)
-
-@router.get('/{resource_id}/locales', description='', name='AD')
-@ContentQueryChecker(locale.model.c(), None)
-async def read(resource_id:int, db:Session=Depends(get_db), **params):
-    return await crud.ad.read(params, db, related_name='locales', resource_id=resource_id)
+    return await crud.ad.delete_2(resource_id, db)
