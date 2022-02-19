@@ -1,14 +1,10 @@
-from redis import Redis
+from redis import from_url
 from config import settings
 from rq import Queue
 
 REDIS_QUEUES = ["default","file","email","sms"]
 
-redis = Redis(
-    host=settings.REDIS_HOST,
-    port=settings.REDIS_PORT,
-    password=settings.REDIS_PASSWORD
-)
+redis = from_url(settings.REDIS_URL)
 
 queues = {
     q:Queue(

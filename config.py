@@ -84,10 +84,12 @@ class Settings(BaseSettings):
 
     REDIS_HOST:str = "127.0.0.1"
     REDIS_PORT:str = "6379"
-    REDIS_PASSWORD:str = ""
-    REDIS_USER:str = ""
-    REDIS_NODE:str = "0"
-    REDIS_URL:str=f"redis://{REDIS_USER}@{REDIS_PASSWORD}:{REDIS_HOST}/{REDIS_PORT}/{REDIS_NODE}"
+    REDIS_PASSWORD:str = ''
+    REDIS_USER:str = ''
+    REDIS_NODE:str = "0" 
+    # {REDIS_USER}:{REDIS_PASSWORD}:
+    # redis://:p9848bcaaa04bd097b7f1a564c046bfe94ad1cc4846bc115f51240d699722fec1@ec2-50-19-49-209.compute-1.amazonaws.com:31420
+    REDIS_URL:str=f"redis://{REDIS_USER}:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_NODE}"
 
     class Config:
         env_file = ".env"
