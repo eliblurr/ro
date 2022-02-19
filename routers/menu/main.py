@@ -35,8 +35,8 @@ async def update(resource_id:int, payload:schemas.UpdateMenu=Depends(schemas.Upd
 @router.put('/{menu_id}/append-meals', description='', name='AD')
 async def update(menu_id:int, meal_ids:List[int], request:Request, db:Session=Depends(get_db)):
     if re.search(r'(remove-meals)$', request.url.path):
-        return await crud.add_meal_to_menu(menu_id, meal_ids, db)
-    return await crud.rem_meal_from_menu(menu_id, meal_ids, db)
+        return await crud.rem_meal_from_menu(menu_id, meal_ids, db)
+    return await crud.add_meal_to_menu(menu_id, meal_ids, db)
 
 @router.delete('/{resource_id}', description='', name='Menu')
 async def delete(resource_id:int, db:Session=Depends(get_db)):
