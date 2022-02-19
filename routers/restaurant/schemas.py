@@ -20,7 +20,7 @@ class RestaurantBase(BaseModel):
 
 @as_form
 class CreateRestaurant(RestaurantBase):
-    city_id: int
+    locale_id: int
 
 @as_form
 class UpdateRestaurant(BaseModel):
