@@ -20,7 +20,7 @@ class Restaurant(BaseMixin, UploadProxy, Base):
     digital_address = Column(String, nullable=True)
     email = Column(String, unique=True, nullable=False)
     phone = Column(String, unique=True, nullable=False)
-    locale_name = Column(Integer, ForeignKey('locales.name'))
+    locale_name = Column(String, ForeignKey('locales.name'))
     locale = relationship('Locale', back_populates="restaurants")
     vouchers = relationship('Voucher', uselist=True, cascade="all, delete")
     meals = relationship('Meal', back_populates="restaurant", cascade="all, delete")
