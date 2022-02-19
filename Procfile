@@ -1,2 +1,2 @@
-web: gunicorn main:app -w 12 -k uvicorn.workers.UvicornWorker  
+web: gunicorn main:app
 worker: python -m redis_queue.worker
