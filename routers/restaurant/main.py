@@ -8,8 +8,8 @@ from typing import List
 router = APIRouter()
 
 @router.post('/', description='', response_model=schemas.Restaurant, status_code=201, name='Restaurant')
-async def create(payload:schemas.CreateRestaurant=Depends(schemas.CreateRestaurant.as_form), image:UploadFile=File(...), db:Session=Depends(get_db)):
-    return await crud.restaurant.create(payload, db, image=image)
+async def create(payload:schemas.CreateRestaurant=Depends(schemas.CreateRestaurant.as_form), logo:UploadFile=File(...), db:Session=Depends(get_db)):
+    return await crud.restaurant.create(payload, db, logo=logo)
 
 @router.get('/', description='', response_model=schemas.RestaurantList, name='Restaurant')
 @ContentQueryChecker(crud.restaurant.model.c(), None)
@@ -21,8 +21,8 @@ async def read_by_id(resource_id:int, db:Session=Depends(get_db)):
     return await crud.restaurant.read_by_id(resource_id, db)
 
 @router.patch('/{resource_id}', description='', response_model=schemas.Restaurant, name='Restaurant')
-async def update(resource_id:int, payload:schemas.UpdateRestaurant=Depends(schemas.UpdateRestaurant.as_form), image:UploadFile=File(None), db:Session=Depends(get_db)):
-    return await crud.restaurant.update_2(resource_id, payload, db, image=image)
+async def update(resource_id:int, payload:schemas.UpdateRestaurant=Depends(schemas.UpdateRestaurant.as_form), logo:UploadFile=File(None), db:Session=Depends(get_db)):
+    return await crud.restaurant.update_2(resource_id, payload, db, logo=logo)
 
 @router.delete('/{resource_id}', description='', name='Restaurant')
 async def delete(resource_id:int, db:Session=Depends(get_db)):
