@@ -11,7 +11,7 @@ import re
 router = APIRouter()
 
 @router.post('/', description='', response_model=schemas.Category, status_code=201, name='Category')
-async def create(payload:schemas.CreateCategory=Depends(schemas.CreateCategory.as_form), image:UploadFile=File(None), db:Session=Depends(get_db)):
+async def create(payload:schemas.CreateCategory=Depends(schemas.CreateCategory.as_form), image:UploadFile=File(...), db:Session=Depends(get_db)):
     return await crud.category.create(payload, db, image=image)
 
 @router.get('/', description='', response_model=schemas.CategoryList, name='Category')

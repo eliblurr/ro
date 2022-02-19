@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, ForeignKey, UniqueConstraint, event
+from sqlalchemy import Column, String, Integer, ForeignKey, UniqueConstraint, event, and_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import relationship
 from utils import async_remove_file
@@ -44,6 +44,12 @@ def receive_set(target, value, oldvalue, initiator):
 
 @event.listens_for(Category, 'before_insert')
 def verify_target_title(mapper, connection, target):
-    res = connection.execute(Category.__table__.select().where(Category.__table__.c.restaurant_id==None, Category.__table__.c.title==target.title))
-    if res.rowcount:  
+    res = connection.execute(
+        Category.__table__.select().where(
+            and_(
+                Category.__table__.c.restaurant_id==None, Category.__table__.c.title==target.title
+            )
+        )
+    ).all()
+    if res.__len__():  
         raise IntegrityError(f"custom select @@ restaurant_id is NULL AND title={target.title}", 'title', f'DETAIL:  Key (title)=({target.title}) already exists.\n')  
