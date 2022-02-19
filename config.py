@@ -100,9 +100,10 @@ AWS_S3_CUSTOM_DOMAIN = f'https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.amazonaws
 AWS_S3_OBJECT_PARAMETERS = {'CacheControl': settings.AWS_S3_OBJECT_CACHE_CONTROL}
 
 try:
+    if not os.path.isdir(UPLOAD_ROOT):
+        os.mkdir(UPLOAD_ROOT)
     if not settings.USE_S3:
-        if not os.path.isdir(UPLOAD_ROOT):
-            os.mkdir(UPLOAD_ROOT)
+        
 
         if not os.path.isdir(AUDIO_ROOT):
             os.mkdir(AUDIO_ROOT)
