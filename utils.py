@@ -2,8 +2,8 @@ from datetime import timedelta, datetime, date
 import inspect, secrets, os, shutil, logging
 from config import JWT_ALGORITHM, settings
 from math import ceil, floor, log2
+import sqlalchemy as sa, re, jwt
 from config import UPLOAD_ROOT
-import sqlalchemy as sa, re
 from typing import Optional
 from fastapi import Form
 from io import BytesIO
@@ -88,10 +88,10 @@ def list_sum(ls):
 
 def create_jwt(data:dict, exp:timedelta=None):
     data.update({"exp": datetime.utcnow()+exp if exp else datetime.utcnow()+timedelta(minutes=settings.ACCESS_SESSION_DURATION_IN_MINUTES)})
-    return jwt.encode(data, settings.SECRET_KEY, algorithm=JWT_ALGORITHM)
+    return jwt.encode(data, settings.SECRET, algorithm=JWT_ALGORITHM)
 
-def decode_jwt(jwt:str):
-    return jwt.decode(data, settings.SECRET_KEY, settings.ALGORITHM)
+def decode_jwt(token:str):
+    return jwt.decode(token, settings.SECRET, JWT_ALGORITHM)
 
 def str_to_datetime(string, frmt='%Y-%m-%d %H:%M:%S'):
     return datetime.strptime(string, frmt)

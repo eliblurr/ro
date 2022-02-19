@@ -1,18 +1,16 @@
-from rq import  Worker
+from rq import  Worker, Connection
 from .queues import redis, queues
 
 workers = [ 
     Worker(
         queue,
         connection=redis,
-        name=f"{key}-worker"
+        name=f"{key}-worker",
    )
    for key,queue in queues.items()
-]
+] # not used
 
-def run_workers(): 
-    worker =  Worker( queues, connection=redis   )
-    worker.work() 
-    # for worker in workers:
-    #     worker.work() 
-
+if __name__ == '__main__':
+    with Connection(redis):
+        worker = Worker( queues, connection=redis )
+        worker.work()

@@ -6,9 +6,8 @@ from sqlalchemy.orm import relationship
 from mixins import BaseMixin
 from database import Base
 from ctypes import File
-from routers.upload.models import UploadProxy
 
-class Meal(BaseMixin, UploadProxy, Base):
+class Meal(BaseMixin, Base):
     '''Meal Model'''
     __tablename__ = "meals"
     __table_args__ = (UniqueConstraint('title', 'restaurant_id', name='uix_title_restaurant_fk'),)

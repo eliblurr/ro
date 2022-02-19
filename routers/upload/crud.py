@@ -4,11 +4,9 @@ from fastapi import HTTPException
 from enum import Enum
 from . import models
 
-from routers.meal.models import Meal
 from routers.restaurant.models import Restaurant
 
 objects = {
-    'meals': Meal, 
     'restaurants': Restaurant
 }
 

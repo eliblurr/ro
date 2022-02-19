@@ -1,4 +1,3 @@
-# from routers.restaurant.schemas import
 from pydantic import BaseModel, constr
 from typing import Optional, Union
 from constants import PHONE, EMAIL
@@ -24,8 +23,8 @@ class AdminLogin(BaseModel):
 class CustomerLogin(UserCode):
     phone: constr(regex=PHONE)
 
-# class RestaurantLogin(UserCode):
-#     email: constr(regex=EMAIL)
+class EmailOrCode(BaseModel):
+    emailOrCode: Union[constr(regex=EMAIL), UserCode]
 
 class LoginResponse(BaseModel):
     access_token: str

@@ -1,9 +1,11 @@
-from sqlalchemy import Column, String, Integer, ForeignKey
+from sqlalchemy import Column, String, Integer, ForeignKey, event
 from sqlalchemy.orm import relationship, validates
+from utils import today_str, async_remove_file
 from routers.upload.models import UploadProxy
 from constants import PHONE, EMAIL
 from mixins import BaseMixin
 from database import Base
+from ctypes import File
 import re
 
 class Restaurant(BaseMixin, UploadProxy, Base):
@@ -26,6 +28,7 @@ class Restaurant(BaseMixin, UploadProxy, Base):
     orders = relationship('Order', back_populates="restaurant", cascade="all, delete")
     tables = relationship('Table', back_populates="restaurant", uselist=True, cascade="all, delete")
     menus = relationship('Menu', secondary='restaurant_menus', backref='restaurant', lazy='dynamic')
+    logo = Column(File(upload_to=f'{today_str()}'), nullable=False)
 
     @validates('email')
     def validate_email(self, key, value):
@@ -42,3 +45,11 @@ class RestaurantMenu(Base):
 
     menu_id = Column(Integer, ForeignKey('menus.id'), primary_key=True)
     restaurant_id = Column(Integer, ForeignKey('restaurants.id'), primary_key=True)
+
+@event.listens_for(Restaurant, 'after_delete')
+def receive_after_delete(mapper, connection, target):
+    if target.logo:async_remove_file(target.logo)
+
+@event.listens_for(Restaurant.logo, 'set', propagate=True)
+def receive_set(target, value, oldvalue, initiator):
+    if oldvalue:async_remove_file(oldvalue)

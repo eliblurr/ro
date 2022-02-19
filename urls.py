@@ -44,7 +44,7 @@ def get_custom_openapi(path='/redoc'):
     )
 
     openapi_schema["info"]["x-logo"] = {
-        "url": f"{cfg.STATIC_URL}/images/logo.png"
+        "url": f"{cfg.STATIC_URL}/images/logo.ico"
     }
     app.openapi_schema = openapi_schema
     return app.openapi_schema
@@ -58,7 +58,7 @@ async def custom_swagger_ui_html():
         openapi_url=app.openapi_url,
         title=app.title + " - Swagger UI",
         oauth2_redirect_url=app.swagger_ui_oauth2_redirect_url,
-        swagger_favicon_url=f"{cfg.STATIC_URL}/images/logo.png",
+        swagger_favicon_url=f"{cfg.STATIC_URL}/images/logo.ico",
         swagger_js_url="/static/js/swagger-ui-bundle.js",
         swagger_css_url="/static/css/swagger-ui.css",
     )
@@ -72,7 +72,7 @@ async def redoc_html():
         openapi_url=app.openapi_url,
         title=app.title + " - ReDoc",
         redoc_js_url="/static/js/redoc.standalone.js",
-        redoc_favicon_url=f"{cfg.STATIC_URL}/images/logo.png",
+        redoc_favicon_url=f"{cfg.STATIC_URL}/images/logo.ico",
         with_google_fonts=True
     )
 

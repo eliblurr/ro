@@ -28,7 +28,3 @@ async def update(resource_id:int, payload:schemas.UpdateMeal=Depends(schemas.Upd
 async def delete(resource_id:int, db:Session=Depends(get_db)):
     return await crud.meal.delete_2(resource_id, db)
 
-@router.post('/test')
-async def create(db:Session=Depends(get_db)):
-    meal = await crud.meal.read_by_id(1, db)
-    print( meal.documents(db))

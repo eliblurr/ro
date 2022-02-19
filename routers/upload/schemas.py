@@ -21,22 +21,3 @@ class UploadList(BaseModel):
     bk_size: int
     pg_size: int
     data: List[Upload]
-
-
-# from routers import Meal as m
-# print(Meal)
-# objects = {
-#     # 'policies':Policy,
-#     'meals': 'Meal'
-# }
-# # from routers.meal.models import Meal
-
-# Object = Enum('Object', {
-#     v:v for v in objects.keys()
-# })
-
-# from config import UPLOAD_EXTENSIONS
-
-# print(UPLOAD_EXTENSIONS)
-
-

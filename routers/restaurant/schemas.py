@@ -22,6 +22,7 @@ class RestaurantBase(BaseModel):
 class CreateRestaurant(RestaurantBase):
     city_id: int
 
+@as_form
 class UpdateRestaurant(BaseModel):
     title: Optional[str]
     status: Optional[bool]
@@ -36,7 +37,7 @@ class UpdateRestaurant(BaseModel):
 
 class Restaurant(RestaurantBase):
     id: int
-    images: List[str] = []
+    logo: str
     created: datetime.datetime
     updated: datetime.datetime
     meals: Optional[List[Meal]]

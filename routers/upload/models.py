@@ -32,97 +32,26 @@ class Upload(BaseMixin, Base):
 def remove_file(mapper, connection, target):
     if target.url:async_remove_file(target.url)
 
-from sqlalchemy.ext.declarative import declared_attr
+class UploadProxy:
 
-# @declarative_mixin
-class UploadProxy(object):
-    
-    def documents(self, db, offset:int=0, limit:int=100):
+    def _base_(self, db, type_:str, offset:int=0, limit:int=100):
         return db.query(
             Upload.url
         ).filter(
             Upload.object==self,
-            Upload.upload_type=='document'
+            Upload.upload_type==type_
         ).order_by(
             desc(Upload.created)
         ).offset(offset).limit(limit).all()
-        
-        # .offset(params['offset']).limit(params['limit'])
-        # select(Upload.url).where(
-        #     Upload.object==self,
-        #     Upload.upload_type=='document'
-        # ).order_by(
-        #     desc(Upload.__table__.c.created)
-        # )
-
-    # @declared_attr
-    # def documents(cls):
-    #     print(cls)
-    #     return column_property(select(
-    #             Upload.url
-    #         ).where(
-    #             Upload.upload_type=='document'
-    #         ).order_by(
-    #             desc(Upload.__table__.c.created)
-    #         )
-    #         .scalar_subquery()
-    #     )
-
-        # .where(
-        #         Upload.object.is_type(cls),
-        #         Upload.object_id==cls.id,
-        #         Upload.upload_type=='document'
-        #     )
-
-    # def videos(self):
-    #     return column_property(select(
-    #             Upload.url
-    #         ).where(
-    #             Upload.object.is_type(self),
-    #             Upload.object_id==self.id,
-    #             Upload.upload_type=='video'
-    #         ).order_by(
-    #             desc(Upload.__table__.c.created)
-    #         )
-    #     )
     
-    # def images(self):
-    #     return column_property(select(
-    #             Upload.url
-    #         ).where(
-    #             Upload.object.is_type(self),
-    #             Upload.object_id==self.id,
-    #             Upload.upload_type=='image'
-    #         ).order_by(
-    #             desc(Upload.__table__.c.created)
-    #         )
-    #     )
-    
-    # def audio(self):
-    #     return column_property(select(
-    #             Upload.url
-    #         ).where(
-    #             Upload.object.is_type(self),
-    #             Upload.object_id==self.id,
-    #             Upload.upload_type=='audio'
-    #         ).order_by(
-    #             desc(Upload.__table__.c.created)
-    #         )
-    #     )
+    def documents(self, db, offset:int=0, limit:int=100):
+        return self._base_(self, db, 'document', offset, limit)
 
-    # def add():
-    #     pass
+    def videos(self, db, offset:int=0, limit:int=100):
+        return self._base_(self, db, 'video', offset, limit)
 
-    # def remove(self, id):
-    #     pass
+    def audio(self, db, offset:int=0, limit:int=100):
+        return self._base_(self, db, 'audio', offset, limit)
 
-    # @declared_attr
-    # def uploads(self):
-    #     return column_property(
-    #         select(
-    #             Upload.url
-    #         ).where(
-    #             Upload.object.is_type(self),
-    #             Upload.object_id==self.id,
-    #         )
-    #     )
+    def images(self, db, offset:int=0, limit:int=100):
+        return self._base_(self, db, 'image', offset, limit)

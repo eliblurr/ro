@@ -49,11 +49,11 @@ class Settings(BaseSettings):
     BASE_URL: str = 'http://localhost'
     DATABASE_URL: str
     ADMIN_EMAIL: str = 'admin@admin.com'
-    TWILIO_PHONE_NUMBER: str = '+16196584362'
     SMS_CODE_VALID_DURATION_IN_MINUTES: int = 5
     ACCESS_SESSION_DURATION_IN_MINUTES: int = 30
     REFRESH_SESSION_DURATION_IN_MINUTES: int = 500
     RESET_PASSWORD_CODE_VALID_DURATION_IN_MINUTES: int = 5
+    TWILIO_PHONE_NUMBER: str = '+18596961389'
     TWILIO_AUTH_TOKEN: str = '7b6c506ee07337cc3d02536d5119c4b2'
     TWILIO_ACCOUNT_SID: str = 'AC959cbde01aced5669b0121ffea2df117'
     API_KEY: str = '_7f$2uF9CArFq7LtmQqBNuQdTa@KLt@*Y%M24Ry=eUd%R6QsXW3=Z-g!!Rvu#srJ5*#PhbV'

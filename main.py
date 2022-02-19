@@ -37,8 +37,7 @@ async def shutdown_event():
 
 from urls import *
 
-from redis_queue.worker import run_workers
-# import redis_queue.dummy
+# from redis_queue.worker import run_workers
 
-# run_workers()
-# try
+# You can then scale the number of web dynos independently of the number of worker dynos.
+# $ heroku ps:scale web=1 worker=5
