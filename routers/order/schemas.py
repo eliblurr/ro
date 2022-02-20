@@ -1,9 +1,9 @@
+from typing import Optional, List, Union, Callable
+from pydantic import BaseModel, conint, validator
 from routers.voucher.schemas import Voucher
-from typing import Optional, List, Union
 from routers.table.schemas import Table
 from routers.meal.schemas import Meal
 import routers.order.models as  m
-from pydantic import BaseModel, conint, validator
 import datetime, enum
 
 class OrderMealBase(BaseModel):
@@ -72,10 +72,22 @@ class Order(OrderBase):
     voucher: Optional[Voucher]
     meals: List[OrderMeal] = []
     amount_paid: Optional[float]
-    formatted_total: str
-    currency_symbol: str
-    currency: str
+    formatted_total: Callable[str, None]
+    currency_symbol: Callable[str, None]
+    currency: Callable[str, None]
     total: float
+
+    @validator('currency')
+    def get_currency(cls, v):
+        return v()
+    
+    @validator('formatted_total')
+    def format_total(cls, v):
+        return v()
+    
+    @validator('currency_symbol')
+    def get_currency_symbol(cls, v):
+        return v()
     
     class Config:
         orm_mode = True

@@ -74,15 +74,12 @@ class Order(BaseMixin, Base):
             return total - self.voucher.discount
         return total
 
-    @hybrid_property
     def currency(self):
         return self.restaurant.locale.get_currency()
 
-    @hybrid_property
     def currency_symbol(self):
         return self.restaurant.locale.get_currency_symbol()
 
-    @hybrid_property
     def formatted_total(self):
         total = self.total()
         return self.restaurant.locale.format_currency(total)
