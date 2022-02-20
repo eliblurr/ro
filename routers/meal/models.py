@@ -7,6 +7,8 @@ from mixins import BaseMixin
 from database import Base
 from ctypes import File
 
+from typing import Callable, Optional, Any
+
 class Meal(BaseMixin, Base):
     '''Meal Model'''
     __tablename__ = "meals"
@@ -21,15 +23,12 @@ class Meal(BaseMixin, Base):
     ratings = relationship('Rating', uselist=True, cascade="all, delete")
     image = Column(File(upload_to=f'{today_str()}'), nullable=False)
 
-    @hybrid_property
-    def currency(self):
-        return self.restaurant.locale.get_currency()
-
-    @hybrid_property
+    def currency(self):       
+        return self.restaurant.locale.get_currency() 
+    
     def currency_symbol(self):
         return self.restaurant.locale.get_currency_symbol()
 
-    @hybrid_property
     def formatted_cost(self):
         return self.restaurant.locale.format_currency(self.cost)
 
@@ -37,7 +36,7 @@ class Meal(BaseMixin, Base):
     def average_rating(self):
         ratings = [item.rating for item in self.ratings] 
         if ratings:return sum(ratings)/ratings.__len__()
-        else:return 'no ratings'
+        else:return 0.0
 
 @event.listens_for(Meal, 'after_delete')
 def receive_after_delete(mapper, connection, target):

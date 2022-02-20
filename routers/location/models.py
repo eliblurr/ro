@@ -17,9 +17,9 @@ class Locale(BaseMethodMixin, Base):
     ads = relationship('AD', secondary='ad_locales', back_populates="locales", lazy='dynamic')
 
     def get_currency(self):
-        currency = get_territory_currencies(self.name, start_date=datetime.date.today())
+        currency = get_territory_currencies(self.name.name, start_date=datetime.date.today())
         if currency:
-            return currency[0]
+            return currency[0] 
         return None
 
     def get_currency_symbol(self):

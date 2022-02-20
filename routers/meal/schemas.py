@@ -1,6 +1,6 @@
 from routers.rating.schemas import RatingBase
-from typing import Optional, List, Union
-from pydantic import BaseModel, confloat
+from typing import Optional, List, Union, Callable
+from pydantic import BaseModel, confloat, validator
 from utils import as_form
 import datetime
 
@@ -30,13 +30,25 @@ class Meal(MealBase):
     id: int
     created: datetime.datetime
     updated: datetime.datetime
+    average_rating: Union[float, str, None]
     ratings: List[Union[RatingBase, None]]
-    currency_symbol: Union[str, None]
-    average_rating: Union[float, str]
-    formatted_cost: Union[str, None]
-    currency: Union[str, None]
+    currency_symbol: Callable[str, None]
+    formatted_cost: Callable[str, None]
+    currency: Callable[str, None]
     image: Union[str, None]
+
+    @validator('currency')
+    def get_currency(cls, v):
+        return v()
     
+    @validator('formatted_cost')
+    def format_cost(cls, v):
+        return v()
+    
+    @validator('currency_symbol')
+    def get_currency_symbol(cls, v):
+        return v()
+
 class MealList(BaseModel):
     bk_size: int
     pg_size: int

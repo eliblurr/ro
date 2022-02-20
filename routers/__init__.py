@@ -39,5 +39,5 @@ __all__=[
 
 from database import engine
 
-# Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 # print(Base.metadata.sorted_tables)
