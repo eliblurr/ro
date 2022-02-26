@@ -75,7 +75,7 @@ class Order(OrderBase):
     formatted_total: Callable[str, None]
     currency_symbol: Callable[str, None]
     currency: Callable[str, None]
-    total: float
+    total: Callable[float, None]
 
     @validator('currency')
     def get_currency(cls, v):
@@ -87,6 +87,10 @@ class Order(OrderBase):
     
     @validator('currency_symbol')
     def get_currency_symbol(cls, v):
+        return v()
+
+    @validator('total')
+    def get_total(cls, v):
         return v()
     
     class Config:

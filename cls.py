@@ -37,8 +37,7 @@ class CRUD:
         except AssertionError as e:
             raise HTTPException(status_code=400, detail=http_exception_detail(msg=f"{e}", type= e.__class__.__name__))
         except Exception as e:
-            print(e)
-            raise HTTPException(status_code=500, detail=http_exception_detail(msg=f"{e}", type= e.__class__.__name__))
+            raise HTTPException(status_code=500, detail=http_exception_detail(msg=e._message(), type= e.__class__.__name__))
         
     async def read_by_id(self, id, db:Session):
         try:

@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, Integer, Enum, select, and_, ForeignKey, Float
 from sqlalchemy.orm import relationship, column_property, validates
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.exc import IntegrityError
 from mixins import BaseMixin, BaseMethodMixin
 from routers.voucher.models import Voucher
 from routers.table.models import Table
@@ -41,8 +42,10 @@ class OrderMeal(BaseMethodMixin, Base):
     #     return value
 
 def restaurant_id(context):
-    id = context.connection.execute(select(Table.restaurant_id).where(Table.__table__.c.id==context.get_current_parameters()["table_id"]))
-    return id.first()[0]
+    id = context.connection.execute(select(Table.restaurant_id).where(Table.__table__.c.id==context.get_current_parameters()["table_id"])).scalar()
+    if not id:
+        raise IntegrityError('no restaurant_id available for table_id', 'table_id', 'could not resolve restaurant_id from table')
+    return id
 
 class Order(BaseMixin, Base):
     '''Order Model'''
@@ -67,7 +70,6 @@ class Order(BaseMixin, Base):
             OrderMeal.order_id==id
         ).correlate_except(OrderMeal).scalar_subquery())
 
-    @hybrid_property
     def total(self):
         total = self.served_total if self.served_total is not None else 0
         if self.voucher:

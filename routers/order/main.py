@@ -10,12 +10,8 @@ router = APIRouter()
 
 @router.post('/', description='', response_model=schemas.Order, status_code=201, name='Order')
 async def create(payload:schemas.CreateOrder, db:Session=Depends(get_db)):
-    try:
-        payload.meals = crud.verify_order(payload.meals, payload.voucher_id, db)
-        return await crud.order.create(payload, db)
-    except Exception as e: 
-        code = 400 if isinstance(e, UnacceptableError) else 404 if isinstance(e, NotFoundError) else 500
-        raise HTTPException(status_code=code, detail=http_exception_detail(msg=e._message(), type=e.__class__.__name__))
+    payload.meals = crud.verify_order(payload.meals, payload.voucher_id, db)
+    return await crud.order.create(payload, db)
 
 @router.get('/', description='', response_model=schemas.OrderList, name='Order')
 @ContentQueryChecker(crud.order.model.c(), None)
