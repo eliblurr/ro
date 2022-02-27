@@ -18,7 +18,7 @@ async def create(payload:schemas.CreateOrder, db:Session=Depends(get_db)):
 async def read(db:Session=Depends(get_db), **params):
     return await crud.order.read(params, db)
 
-@router.get('/{resource_id}/meals', description='', response_model=schemas.OrderList, name='Meals')
+@router.get('/{resource_id}/meals', description='', response_model=schemas.OrderMealList, name='Meals')
 @ContentQueryChecker(crud.order_meal.model.c(), None)
 async def read(resource_id:int, db:Session=Depends(get_db), **params):
     params.update({"order_id":resource_id})

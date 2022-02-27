@@ -34,6 +34,11 @@ class OrderMeal(BaseModel):
     class Config:
         orm_mode = True
 
+class OrderMealList(BaseModel):
+    bk_size: int
+    pg_size: int
+    data: List[OrderMeal]
+
 class OrderBase(BaseModel):
     class Meta:
         model = m.Order
