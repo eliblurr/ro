@@ -14,7 +14,7 @@ class Menu(BaseMixin, Base):
     metatitle = Column(String, nullable=True)
     description = Column(String, nullable=False)
     restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
-    image = Column(File(upload_to=f'{today_str()}'), nullable=False)
+    image = Column(File(upload_to=f'{today_str()}'), nullable=True)
     meals = relationship("Meal", secondary='menu_meals', backref='menu')
 
 class MenuMeal(Base):

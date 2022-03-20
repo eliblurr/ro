@@ -8,7 +8,7 @@ from typing import List
 router = APIRouter()
 
 @router.post('/', description='', response_model=schemas.Meal, status_code=201, name='Meal')
-async def create(payload:schemas.CreateMeal=Depends(schemas.CreateMeal.as_form), image:UploadFile=File(None), db:Session=Depends(get_db)):
+async def create(payload:schemas.CreateMeal=Depends(schemas.CreateMeal.as_form), image:UploadFile=File(...), db:Session=Depends(get_db)):
     return await crud.meal.create(payload, db, image=image)
 
 @router.get('/', description='', response_model=schemas.MealList, name='Meal')
