@@ -63,7 +63,7 @@ class CreateOrder(OrderBase):
 class UpdateOrder(OrderBase):
     voucher_id: Optional[int]
     status: Optional[m.OrderState]
-    meals: Optional[List[CreateOrderMeal]]
+    meals: Optional[List[UpdateOrCreateOrderMeal]]
 
     class Meta:
         model = m.Order

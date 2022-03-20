@@ -32,18 +32,19 @@ async def read_by_id(resource_id:int, db:Session=Depends(get_db)):
 async def update(id:int, payload:schemas.UpdateOrderMeal, db:Session=Depends(get_db)):
     return await crud.order_meal.update(id, payload, db)
 
-@router.put('/{resource_id}', description='', response_model=schemas.Order, name='Order')
-async def update(resource_id:int, payload:schemas.UpdateOrder, db:Session=Depends(get_db)):
-    return await crud.order.update(resource_id, payload.copy(exclude={'meals'}), db)
-
-# @router.put('/{order_id}/meals/{meal_id}', description='', response_model=schemas.OrderMeal, name='Order')
-# async def update(order_id:int, meal_id:int, payload:schemas.CreateOrderMeal, db:Session=Depends(get_db)):
-#     return await crud.order.update(resource_id, payload.copy(exclude={'meals'}), db)
-
 @router.delete('/{resource_id}', description='', name='Order')
 async def delete(resource_id:int, db:Session=Depends(get_db)):
     return await crud.order.delete(resource_id, db)
 
-# @router.delete('/meals/{order_meal_id}', description='', response_model=schemas.OrderMeal, name='Order')
-# async def update(order_meal_id:int, db:Session=Depends(get_db)):
-#     return await crud.order_meal.delete(order_meal_id, db)
+@router.delete('/meals/{order_meal_id}', description='', response_model=schemas.OrderMeal, name='Order')
+async def update(order_meal_id:int, db:Session=Depends(get_db)):
+    return await crud.order_meal.delete(order_meal_id, db)
+
+@router.put('/{resource_id}', description='', response_model=schemas.Order, name='Order')
+async def update(resource_id:int, payload:schemas.UpdateOrder, db:Session=Depends(get_db)):
+    if payload.meals:
+        payload.meals = crud.verify_order(payload.meals, payload.voucher_id, db)
+        for meal in payload.meals:
+            await crud.order_meal.create(meal, db, order_id=resource_id)
+    return await crud.order.update(resource_id, payload.copy(exclude={'meals'}), db)
+
