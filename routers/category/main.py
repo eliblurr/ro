@@ -28,7 +28,7 @@ async def read_by_id(resource_id:int, db:Session=Depends(get_db)):
 async def read(resource_id:int, db:Session=Depends(get_db), **params):
     return await crud.category.read(params, db, related_name='meals', resource_id=resource_id)
 
-@router.get('/{resource_id}/menus', description='', name='Category')
+@router.get('/{resource_id}/menus', description='', response_model=schemas.Menu, name='Category')
 @ContentQueryChecker(menu.model.c(), None)
 async def read(resource_id:int, db:Session=Depends(get_db), **params):
     return await crud.category.read(params, db, related_name='menus', resource_id=resource_id)

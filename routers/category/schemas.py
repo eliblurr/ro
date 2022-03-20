@@ -2,6 +2,7 @@ from typing import Optional, List
 from pydantic import BaseModel, Field
 from utils import as_form
 import datetime, enum
+from routers.menu.schemas import Menu
 
 class CategoryBase(BaseModel):
     title: str
